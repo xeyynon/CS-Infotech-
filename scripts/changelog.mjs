@@ -115,7 +115,6 @@ function regenChangelog() {
     .filter(Boolean)
     .map((m) => parseReport(Number(m[1])))
     .sort((a, b) => b.n - a.n);
-  const tagged = new Set(tags());
   const lines = [
     '# Changelog',
     '',
@@ -123,9 +122,10 @@ function regenChangelog() {
     'Newest first. Internal changes (`InBulNN` tags) carry no entry.',
     '',
   ];
+  // No "pending" marker: the changelog is written before the commit that
+  // --tag pins, and --tag must not touch files.
   for (const r of reports) {
-    const state = tagged.has(`build-${r.n}`) ? '' : ' *(pending tag)*';
-    lines.push(`## Build ${r.n} — ${r.title}${state}`, '', `${r.date}`, '', r.summary, '', `Report: [MD/builds/build-${r.n}.md](MD/builds/build-${r.n}.md)`, '');
+    lines.push(`## Build ${r.n} — ${r.title}`, '', `${r.date}`, '', r.summary, '', `Report: [MD/builds/build-${r.n}.md](MD/builds/build-${r.n}.md)`, '');
   }
   writeFileSync(CHANGELOG, lines.join('\n'));
 }
@@ -150,7 +150,6 @@ function tagHead() {
   const { title: reportTitle } = parseReport(n);
   if (reportTitle !== title) throw new Error(`Commit title "${title}" does not match report title "${reportTitle}".`);
   git(`tag build-${n} ${head}`);
-  regenChangelog();
   console.log(`tagged build-${n}`);
 }
 
