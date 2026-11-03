@@ -1,0 +1,5 @@
+# Store text with LF; let each OS check out its own line endings.
+* text=auto
+*.png binary
+*.ttf binary
+*.jpg binary

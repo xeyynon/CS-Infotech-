@@ -1,0 +1,204 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../app/router.dart';
+import '../../app/theme.dart';
+import '../../core/providers.dart';
+import '../../core/utils/launchers.dart';
+import '../../core/widgets/cards.dart';
+
+/// Shown in the drawer's App Info and the Settings footer.
+const String kAppVersion = '1.0.0';
+
+/// Figma 09 — the side navigation.
+class AppDrawer extends ConsumerWidget {
+  const AppDrawer({super.key});
+
+  void _soon(BuildContext context, String what) {
+    Navigator.of(context).pop();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$what is not part of this test build.')),
+    );
+  }
+
+  Future<void> _logout(BuildContext context, WidgetRef ref) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Log out?'),
+        content: const Text(
+          'You will need to sign in again to see your calling lists.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Log out'),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) {
+      await ref.read(sessionProvider.notifier).signOut();
+      // The router redirects to Login when the session is gone.
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final c = context.c;
+    final user = ref.watch(sessionProvider);
+    final plan = (user?.subscription ?? '').replaceFirst('Calley ', '');
+
+    Widget item(IconData icon, String label, VoidCallback onTap) => ListTile(
+      leading: Icon(icon, size: 22),
+      title: Text(
+        label,
+        style: const TextStyle(fontSize: 14.5, fontWeight: FontWeight.w500),
+      ),
+      onTap: onTap,
+      minTileHeight: Dims.tap,
+      dense: true,
+    );
+
+    return Drawer(
+      child: SafeArea(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            Container(
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+              color: c.primary,
+              child: Row(
+                children: [
+                  Avatar(
+                    initial: user?.initial ?? '?',
+                    size: 46,
+                    inverted: true,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text.rich(
+                          TextSpan(
+                            text: user?.firstName ?? 'Guest',
+                            style: TextStyle(
+                              color: c.onPrimary,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
+                            children: [
+                              if (plan.isNotEmpty)
+                                TextSpan(
+                                  text: '  ·  $plan',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 12,
+                                    color: c.onPrimary.withValues(alpha: 0.85),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          user?.email ?? '—',
+                          style: TextStyle(
+                            color: c.onPrimary.withValues(alpha: 0.85),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 6),
+            item(Icons.rocket_launch_outlined, 'Getting Started', () {
+              Navigator.pop(context);
+              context.push(Routes.gettingStarted);
+            }),
+            item(Icons.sync_rounded, 'Sync Data', () {
+              Navigator.pop(context);
+              ref.invalidate(listsProvider);
+              final sel = ref.read(selectedListProvider);
+              if (sel != null) ref.invalidate(listDetailsProvider(sel.id));
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Refreshing from the server…')),
+              );
+            }),
+            item(
+              Icons.emoji_events_outlined,
+              'Gamification',
+              () => _soon(context, 'Gamification'),
+            ),
+            item(
+              Icons.description_outlined,
+              'Send Logs',
+              () => _soon(context, 'Send Logs'),
+            ),
+            item(Icons.settings_outlined, 'Settings', () {
+              Navigator.pop(context);
+              context.push(Routes.settings);
+            }),
+            item(Icons.help_outline_rounded, 'Help?', () {
+              Navigator.pop(context);
+              ref.read(launcherProvider).open(context, Links.whatsapp);
+            }),
+            item(
+              Icons.person_off_outlined,
+              'Cancel Subscription',
+              () => _soon(context, 'Cancel Subscription'),
+            ),
+            const Divider(height: 20, indent: 18, endIndent: 18),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 0, 18, 6),
+              child: Text(
+                'App Info',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: c.primary,
+                ),
+              ),
+            ),
+            item(Icons.info_outline_rounded, 'About Us', () {
+              Navigator.pop(context);
+              ref.read(launcherProvider).open(context, Links.about);
+            }),
+            item(Icons.privacy_tip_outlined, 'Privacy Policy', () {
+              Navigator.pop(context);
+              ref.read(launcherProvider).open(context, Links.privacy);
+            }),
+            ListTile(
+              leading: const Icon(Icons.verified_outlined, size: 22),
+              title: const Text(
+                'Version',
+                style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w500),
+              ),
+              trailing: Text(
+                kAppVersion,
+                style: TextStyle(color: c.textMuted, fontSize: 13),
+              ),
+              minTileHeight: Dims.tap,
+              dense: true,
+            ),
+            item(Icons.share_outlined, 'Share App', () {
+              Navigator.pop(context);
+              ref.read(launcherProvider).open(context, Links.playStore);
+            }),
+            item(Icons.logout_rounded, 'Logout', () => _logout(context, ref)),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+}

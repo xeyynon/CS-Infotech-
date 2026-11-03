@@ -1,0 +1,15 @@
+# Browser automation output from research sessions
+.playwright-mcp/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+.vscode/settings.json
+
+# Never commit secrets
+.env
+*.keystore
+*.jks
+key.properties
