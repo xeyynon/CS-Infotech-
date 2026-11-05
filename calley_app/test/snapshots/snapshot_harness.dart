@@ -3,6 +3,7 @@
 // Why here and not on a device: the machine has no emulator. Flutter's test
 // renderer draws the exact same widget tree with Skia, so these PNGs are a
 // faithful record of the UI; only platform text shaping differs.
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -13,6 +14,8 @@ import 'package:calley_app/core/providers.dart';
 import 'package:calley_app/core/storage/session_store.dart';
 import 'package:calley_app/models/models.dart';
 import 'package:calley_app/core/utils/launchers.dart';
+import 'package:calley_app/core/widgets/calley_loader.dart';
+import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart' show LaunchMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,6 +35,24 @@ const CalleyApi sampleApi = SampleCalleyApi(
   latency: Duration.zero,
   loadText: loadMockFromDisk,
 );
+
+/// Holds every animation still, as a phone with "remove animations" does, so
+/// a snapshot of the loader is the same picture every run.
+void stillMotion(WidgetTester tester) {
+  tester.platformDispatcher.accessibilityFeaturesTestValue =
+      const FakeAccessibilityFeatures(disableAnimations: true);
+  addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+}
+
+/// The server never answers the list details: the loading state stays.
+class HangingApi extends SampleCalleyApi {
+  const HangingApi()
+    : super(latency: Duration.zero, loadText: loadMockFromDisk);
+
+  @override
+  Future<ListDetails> getListDetails(String listId) =>
+      Completer<ListDetails>().future;
+}
 
 /// A launcher whose every platform call succeeds. Pass [onLaunch] / [onShare]
 /// to see what the app tried to open or share.
@@ -143,6 +164,9 @@ Future<GoRouter> pumpApp(
   addTearDown(tester.view.reset);
 
   SharedPreferences.setMockInitialValues(prefs);
+  // Read the loader animation on real I/O now, so it is already in Lottie's
+  // cache when the widget asks for it under the test's fake clock.
+  await tester.runAsync(() => AssetLottie(CalleyLoader.asset).load());
   final store = SessionStore(await SharedPreferences.getInstance());
   final router = GoRouter(initialLocation: location, routes: appRoutes());
 

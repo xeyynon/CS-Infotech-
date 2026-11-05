@@ -9,6 +9,7 @@ import '../../core/providers.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/utils/launchers.dart';
 import '../../core/widgets/bottom_bar.dart';
+import '../../core/widgets/calley_loader.dart';
 import '../../core/widgets/cards.dart';
 import '../../core/widgets/donut_chart.dart';
 import '../../core/widgets/primary_button.dart';
@@ -164,6 +165,16 @@ class _EmptyDashboard extends ConsumerWidget {
                   eyebrow: 'Hello',
                   name: user?.firstName ?? 'there',
                   subline: 'Welcome to Calley!',
+                  initial: user?.initial ?? '?',
+                  chips: [
+                    if ((user?.subscription ?? '').isNotEmpty)
+                      GreetingChip(
+                        user!.subscription!,
+                        Icons.workspace_premium_outlined,
+                      ),
+                    if (ref.watch(dataSourceProvider) == DataSource.sample)
+                      const GreetingChip('Sample data', Icons.dataset_outlined),
+                  ],
                 ),
                 const SizedBox(height: Dims.gap),
                 if (lists.hasError && !lists.isLoading)
@@ -448,7 +459,8 @@ class _ActiveDashboard extends ConsumerWidget {
                 const SizedBox(height: Dims.gap),
                 details.when(
                   skipLoadingOnRefresh: false, // B-30: Retry shows progress
-                  loading: () => const _StatsSkeleton(),
+                  loading: () =>
+                      const CalleyLoaderBlock(label: 'Loading your list…'),
                   error: (e, _) => ErrorView(
                     error: e,
                     onRetry: () => ref.invalidate(listDetailsProvider(list.id)),
@@ -602,29 +614,6 @@ class _Stats extends StatelessWidget {
             style: context.body(12, color: c.textMuted),
           ),
         ],
-      ],
-    );
-  }
-}
-
-class _StatsSkeleton extends StatelessWidget {
-  const _StatsSkeleton();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const AppCard(
-          child: Column(
-            children: [
-              SkeletonBox(height: 170, width: 170, radius: 85),
-              SizedBox(height: 18),
-              SkeletonBox(height: 14, width: 220),
-            ],
-          ),
-        ),
-        const SizedBox(height: Dims.gap),
-        const SkeletonBox(height: 86, radius: Dims.cardRadius),
       ],
     );
   }

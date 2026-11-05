@@ -13,6 +13,7 @@ scaffolds to be filled as work progresses.
 - [decisions.md](decisions.md) — log of key decisions and their reasons (DEC-001 onwards).
 - [tasks.md](tasks.md) — living task tracker.
 - [video_requirements.md](video_requirements.md) — the task video step by step against the app (all steps met).
+- [frontendcalley.md](frontendcalley.md) — **how the frontend was designed and built**, written to be reused: principles, HCI rules, design system, component kit, accessibility traps, testing tricks, audit process, build order, checklist.
 - [plan_drawer_features.md](plan_drawer_features.md) — plan and checklist for the drawer and bell features (branch `feature/drawer-and-reminders`).
 - [bugs.md](bugs.md) — verified bug register from the 2026-11-05 audit (47 confirmed, 20 refuted).
 - [bugfixed.md](bugfixed.md) — what was done about each bug, and the UX changes made with them.

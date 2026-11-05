@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme.dart';
 import '../../core/providers.dart';
 import '../../core/utils/formatters.dart';
+import '../../core/widgets/calley_loader.dart';
 import '../../core/widgets/cards.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../core/widgets/status_views.dart';
@@ -250,12 +251,7 @@ class _CallingQueueScreenState extends ConsumerState<CallingQueueScreen> {
           Expanded(
             // B-30: show the loading state on Retry too, not only first load.
             child: details.isLoading
-                ? ListView.separated(
-                    padding: const EdgeInsets.all(Dims.page),
-                    itemCount: 7,
-                    separatorBuilder: (_, _) => const SizedBox(height: 12),
-                    itemBuilder: (_, _) => const SkeletonBox(height: 60),
-                  )
+                ? const Center(child: CalleyLoader(label: 'Loading contacts…'))
                 : details.hasError
                 ? Padding(
                     padding: const EdgeInsets.all(Dims.page),
