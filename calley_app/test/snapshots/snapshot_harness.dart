@@ -15,6 +15,7 @@ import 'package:calley_app/core/storage/session_store.dart';
 import 'package:calley_app/models/models.dart';
 import 'package:calley_app/core/utils/launchers.dart';
 import 'package:calley_app/core/widgets/calley_loader.dart';
+import 'package:calley_app/core/widgets/tutorial_video.dart';
 import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart' show LaunchMode;
 import 'package:flutter/material.dart';
@@ -180,6 +181,22 @@ Future<GoRouter> pumpApp(
         clockProvider.overrideWithValue(() => DateTime(2026, 11, 4, 10, 30)),
         // No platform in a widget test: pretend every launch succeeded.
         launcherProvider.overrideWithValue(launcher ?? okLauncher()),
+        // A web view cannot run in a widget test: a plain 16:9 box stands in.
+        playerBuilderProvider.overrideWithValue(
+          (context, videoId) => AspectRatio(
+            aspectRatio: 16 / 9,
+            child: ColoredBox(
+              key: ValueKey('player-$videoId'),
+              color: Colors.black,
+              child: const Center(
+                child: Text(
+                  'Video player',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ),
+        ),
         ...overrides,
       ],
       child: MaterialApp.router(

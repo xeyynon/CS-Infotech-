@@ -115,6 +115,18 @@ void main() {
       await snap(tester, '05-getting-started', dark: dark);
     });
 
+    testWidgets('05b getting started, video playing$suffix', (tester) async {
+      await pumpApp(
+        tester,
+        location: '/getting-started',
+        themeMode: mode,
+        prefs: signedInPrefs(onboarded: false),
+      );
+      await tester.tap(find.text('Play here'));
+      await settle(tester);
+      await snap(tester, '05b-getting-started-video', dark: dark);
+    });
+
     testWidgets('06 dashboard, lists available, none chosen$suffix', (
       tester,
     ) async {

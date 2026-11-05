@@ -5,6 +5,7 @@ import '../snapshots/snapshot_harness.dart';
 
 void main() {
   setUpAll(loadSnapshotFonts);
+  tutorialTests();
 
   testWidgets('the dashboard waits behind the branded loader', (tester) async {
     await pumpApp(
@@ -72,5 +73,77 @@ void main() {
     // One in the banner, one as the card's chip.
     expect(find.text('Sample data'), findsOneWidget);
     expect(find.textContaining('Sample data'), findsWidgets);
+  });
+}
+
+void tutorialTests() {
+  testWidgets(
+    'Play here shows the player inside the card, Hide video undoes it',
+    (tester) async {
+      final opened = <Uri>[];
+      await pumpApp(
+        tester,
+        location: '/getting-started',
+        prefs: signedInPrefs(onboarded: false),
+        launcher: okLauncher(onLaunch: opened.add),
+      );
+      expect(find.text('Video player'), findsNothing);
+      await tester.tap(find.text('Play here'));
+      await settle(tester);
+      expect(find.text('Video player'), findsOneWidget);
+      expect(opened, isEmpty, reason: 'playing here must not leave the app');
+      expect(find.text('Start Calling Now'), findsOneWidget);
+
+      await tester.tap(find.text('Hide video'));
+      await settle(tester);
+      expect(find.text('Video player'), findsNothing);
+    },
+  );
+
+  testWidgets('tapping the poster also plays here', (tester) async {
+    await pumpApp(
+      tester,
+      location: '/getting-started',
+      prefs: signedInPrefs(onboarded: false),
+    );
+    await tester.tap(find.text('2 Minute Challenge'));
+    await settle(tester);
+    expect(find.text('Video player'), findsOneWidget);
+  });
+
+  testWidgets('Open in YouTube hands the video to the platform', (
+    tester,
+  ) async {
+    final opened = <Uri>[];
+    await pumpApp(
+      tester,
+      location: '/getting-started',
+      prefs: signedInPrefs(onboarded: false),
+      launcher: okLauncher(onLaunch: opened.add),
+    );
+    await tester.tap(find.text('Open in YouTube'));
+    await settle(tester);
+    expect(
+      opened.single.toString(),
+      'https://www.youtube.com/watch?v=hzwSizmvMD0',
+    );
+    expect(find.text('Video player'), findsNothing);
+  });
+
+  testWidgets('the upload note keeps the Figma wording and opens the panel', (
+    tester,
+  ) async {
+    final opened = <Uri>[];
+    await pumpApp(
+      tester,
+      location: '/getting-started',
+      prefs: signedInPrefs(onboarded: false),
+      launcher: okLauncher(onLaunch: opened.add),
+    );
+    expect(find.text('BEFORE YOU START'), findsOneWidget);
+    expect(find.textContaining('uploaded the list to call'), findsOneWidget);
+    await tester.tap(find.text('Open the Calley web panel'));
+    await settle(tester);
+    expect(opened.single.host, 'app.getcalley.com');
   });
 }
