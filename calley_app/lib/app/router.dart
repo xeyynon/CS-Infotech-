@@ -23,6 +23,10 @@ abstract final class Routes {
   static const settings = '/settings';
 
   static const authGroup = {language, register, otp, login};
+
+  /// B-01: only these bounce a signed-in user away. /language is also
+  /// reachable from Settings while signed in.
+  static const signedOutOnly = {register, otp, login};
 }
 
 /// Bumps whenever the session changes so GoRouter re-runs `redirect`.
@@ -50,7 +54,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       final loggedIn = ref.read(sessionProvider) != null;
       final path = state.uri.path;
       final inAuth = Routes.authGroup.contains(path);
-      if (loggedIn && inAuth) {
+      if (loggedIn && Routes.signedOutOnly.contains(path)) {
         return ref.read(onboardedProvider)
             ? Routes.dashboard
             : Routes.gettingStarted;

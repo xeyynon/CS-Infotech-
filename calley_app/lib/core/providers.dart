@@ -103,6 +103,8 @@ class SessionNotifier extends Notifier<User?> {
     ref.invalidate(selectedListProvider);
     ref.invalidate(onboardedProvider);
     ref.invalidate(dispositionsProvider);
+    // B-14: the next person to sign in must not inherit this one's email.
+    ref.invalidate(pendingSignupProvider);
   }
 }
 
@@ -124,16 +126,19 @@ final onboardedProvider = NotifierProvider<OnboardedNotifier, bool>(
   OnboardedNotifier.new,
 );
 
-/// Email typed on Register, carried to the OTP screen. In memory only.
-class PendingEmailNotifier extends Notifier<String?> {
+/// What Register hands to the OTP screen. In memory only.
+typedef PendingSignup = ({String email, String mobile, String? otpNotice});
+
+class PendingSignupNotifier extends Notifier<PendingSignup?> {
   @override
-  String? build() => null;
-  void set(String? v) => state = v;
+  PendingSignup? build() => null;
+  void set(PendingSignup? v) => state = v;
 }
 
-final pendingEmailProvider = NotifierProvider<PendingEmailNotifier, String?>(
-  PendingEmailNotifier.new,
-);
+final pendingSignupProvider =
+    NotifierProvider<PendingSignupNotifier, PendingSignup?>(
+      PendingSignupNotifier.new,
+    );
 
 // ---------------------------------------------------------------------------
 // Calling lists
@@ -169,14 +174,32 @@ final listDetailsProvider = FutureProvider.family<ListDetails, String>((
   return ref.watch(apiProvider).getListDetails(listId);
 });
 
-/// Dispositions the agent logs after a call. The mock API has no write
-/// endpoint, so these stay in memory for the session and are labelled so.
+/// Dispositions the agent logs after a call, keyed by list AND record (B-28),
+/// so a contact that appears in two lists keeps two separate outcomes.
+/// The mock API has no write endpoint, so these stay in memory for the
+/// session and the UI says so. Switching data source starts afresh (B-13):
+/// outcomes logged against sample records do not belong to the server's.
 class DispositionsNotifier extends Notifier<Map<String, String>> {
   @override
-  Map<String, String> build() => const {};
+  Map<String, String> build() {
+    ref.watch(dataSourceProvider);
+    return const {};
+  }
 
-  void set(String recordKey, String feedback) =>
-      state = {...state, recordKey: feedback};
+  static String keyFor(String listId, String recordKey) => '$listId/$recordKey';
+
+  String? get(String listId, String recordKey) =>
+      state[keyFor(listId, recordKey)];
+
+  void set(String listId, String recordKey, String feedback) =>
+      state = {...state, keyFor(listId, recordKey): feedback};
+
+  void remove(String listId, String recordKey) =>
+      state = {...state}..remove(keyFor(listId, recordKey));
+
+  /// How many records of [listId] have an outcome logged.
+  int countFor(String listId) =>
+      state.keys.where((k) => k.startsWith('$listId/')).length;
 }
 
 final dispositionsProvider =

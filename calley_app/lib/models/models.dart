@@ -159,6 +159,16 @@ class CallRecord {
 
   String get displayName => '$firstName $lastName'.trim();
 
+  /// B-09: the server never sends status "rescheduled"; a call that was made
+  /// and moved to a later time comes as status "called" with rescheduledAt
+  /// set. Either form counts as scheduled.
+  bool get isRescheduled =>
+      status == CallStatus.rescheduled || rescheduledAt != null;
+
+  String get initials =>
+      '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}'
+          .toUpperCase();
+
   /// A stable identity for UI keys and local disposition notes.
   String get key => '${phone ?? ''}|${email ?? ''}|$firstName|$lastName';
 
@@ -217,7 +227,32 @@ class ListDetails {
   final int rescheduled;
   final List<CallRecord> calls;
 
-  int get total => pending + called + rescheduled;
+  // The server's three counts overlap: "rescheduled" calls are also among
+  // "called" (sample: 27 pending + 23 called = 50 records, 11 of the called
+  // have a rescheduledAt). The chart needs parts that add up to the whole,
+  // so these split the records into three disjoint groups. With no records
+  // they fall back to the summary numbers.
+
+  /// Not yet called.
+  int get pendingCount => calls.isEmpty
+      ? pending
+      : calls
+            .where((r) => r.status == CallStatus.pending && !r.isRescheduled)
+            .length;
+
+  /// Called and finished (not moved to a later time).
+  int get doneCount => calls.isEmpty
+      ? (called - rescheduled).clamp(0, called)
+      : calls
+            .where((r) => r.status == CallStatus.called && !r.isRescheduled)
+            .length;
+
+  /// Moved to a later time.
+  int get scheduledCount =>
+      calls.isEmpty ? rescheduled : calls.where((r) => r.isRescheduled).length;
+
+  /// Every contact in the list, counted once.
+  int get total => pendingCount + doneCount + scheduledCount;
 
   factory ListDetails.fromJson(Map<String, dynamic> j) => ListDetails(
     pending: _int(j['pending']) ?? 0,

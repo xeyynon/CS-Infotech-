@@ -81,12 +81,12 @@ class CalleyColors extends ThemeExtension<CalleyColors> {
     border: Color(0xFFE6E4DD),
     text: Color(0xFF15161A),
     textSecondary: Color(0xFF4D505A),
-    textMuted: Color(0xFF7A7E89),
+    textMuted: Color(0xFF656975), // B-11: 4.9:1 on input, 5.3:1 on paper
     pending: Color(0xFFF0B429),
     done: Color(0xFF1F5EFF),
     scheduled: Color(0xFF8B5CF6),
-    danger: Color(0xFFD83A3A),
-    success: Color(0xFF1C9A5A),
+    danger: Color(0xFFC0302F), // B-11: 5.0:1 on white
+    success: Color(0xFF167A47), // B-11: 5.1:1 on white
     whatsapp: Color(0xFF25D366),
     skeleton: Color(0xFFE8E6E0),
   );
@@ -105,7 +105,7 @@ class CalleyColors extends ThemeExtension<CalleyColors> {
     border: Color(0xFF2A2E36),
     text: Color(0xFFF2F2F0),
     textSecondary: Color(0xFFB5B8C0),
-    textMuted: Color(0xFF80848F),
+    textMuted: Color(0xFF8D919C), // B-11: 5.3:1 on card
     pending: Color(0xFFF5C04A),
     done: Color(0xFF6B93FF),
     scheduled: Color(0xFFA78BFA),

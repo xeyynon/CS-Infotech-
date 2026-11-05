@@ -1,6 +1,4 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -44,30 +42,38 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _submit() async {
+    // B-25: the keyboard's Done key also lands here; ignore it mid-request.
+    if (_busy) return;
     setState(() => _agreeError = !_agreed);
     if (!_form.currentState!.validate() || !_agreed) return;
     setState(() {
       _busy = true;
       _error = null;
     });
+    // B-22: take everything needed after the awaits now, so leaving the
+    // screen mid-request cannot throw or lose the result.
+    final api = ref.read(apiProvider);
+    final pending = ref.read(pendingSignupProvider.notifier);
+    final email = _email.text.trim();
+    final mobile = _mobile.text.trim();
     try {
-      await ref
-          .read(apiProvider)
-          .register(
-            username: _name.text.trim(),
-            email: _email.text.trim(),
-            password: _password.text,
-          );
-      ref.read(pendingEmailProvider.notifier).set(_email.text.trim());
-      // Figma 03 says "we have sent an OTP to your email": request it now.
+      await api.register(
+        username: _name.text.trim(),
+        email: email,
+        password: _password.text,
+      );
+      // Figma 03 says "we have sent an OTP": request it now. If that fails
+      // the OTP screen can resend; registration itself succeeded.
+      String? notice;
       try {
-        await ref.read(apiProvider).sendOtp(email: _email.text.trim());
+        notice = await api.sendOtp(email: email);
       } on ApiException {
-        // The OTP screen can resend; registration itself succeeded.
+        notice = null;
       }
+      pending.set((email: email, mobile: mobile, otpNotice: notice));
       if (mounted) context.push(Routes.otp);
     } on ApiException catch (e) {
-      setState(() => _error = e);
+      if (mounted) setState(() => _error = e);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -102,6 +108,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 validator: Validators.name,
                 autofillHints: const [AutofillHints.name],
                 keyboardType: TextInputType.name,
+                textCapitalization: TextCapitalization.words,
               ),
               const SizedBox(height: 12),
               AppTextField(
@@ -155,10 +162,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       autofillHints: const [
                         AutofillHints.telephoneNumberNational,
                       ],
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(10),
-                      ],
+                      inputFormatters: [IndianMobileFormatter()],
                       onSubmitted: (_) => _submit(),
                     ),
                   ),
@@ -255,43 +259,50 @@ class _TermsRow extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        InkWell(
-          onTap: () => onChanged(!value),
-          borderRadius: BorderRadius.circular(8),
-          child: Row(
-            children: [
-              Checkbox(
-                value: value,
-                onChanged: (v) => onChanged(v ?? false),
-                isError: error,
-              ),
-              Expanded(
-                child: Text.rich(
-                  TextSpan(
-                    text: 'I agree to the ',
-                    style: TextStyle(fontSize: 12.5, color: c.textSecondary),
-                    children: [
-                      TextSpan(
-                        text: 'Terms and Conditions',
-                        style: TextStyle(
-                          color: c.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        recognizer: TapGestureRecognizer()..onTap = onTerms,
-                      ),
-                    ],
-                  ),
+        Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            // B-26: the checkbox and its words are one control with one
+            // label. The Terms link is a separate, separately sized target.
+            MergeSemantics(
+              child: InkWell(
+                onTap: () => onChanged(!value),
+                borderRadius: BorderRadius.circular(8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Checkbox(
+                      value: value,
+                      onChanged: (v) => onChanged(v ?? false),
+                      isError: error,
+                    ),
+                    Text(
+                      'I agree to the',
+                      style: context.body(13, color: c.textSecondary),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+            TextButton(
+              onPressed: onTerms,
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                minimumSize: const Size(0, Dims.tap),
+              ),
+              child: const Text('Terms and Conditions'),
+            ),
+          ],
         ),
         if (error)
-          Padding(
-            padding: const EdgeInsets.only(left: 12, top: 2),
-            child: Text(
-              'Please accept the terms to continue',
-              style: TextStyle(fontSize: 12, color: c.danger),
+          Semantics(
+            liveRegion: true,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 12, top: 2),
+              child: Text(
+                'Please accept the terms to continue',
+                style: context.body(12.5, color: c.danger),
+              ),
             ),
           ),
       ],

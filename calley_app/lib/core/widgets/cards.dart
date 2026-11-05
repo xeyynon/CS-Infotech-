@@ -69,6 +69,7 @@ class StatLedger extends StatelessWidget {
                 child: Semantics(
                   button: entries[i].onTap != null,
                   label: '${entries[i].label}, ${entries[i].value} calls',
+                  onTap: entries[i].onTap, // B-02
                   child: ExcludeSemantics(
                     child: InkWell(
                       onTap: entries[i].onTap,

@@ -40,14 +40,18 @@ class CallingListsSection extends ConsumerWidget {
                 Semantics(
                   button: true,
                   label: busy ? 'Refreshing' : 'Refresh lists',
+                  onTap: busy ? null : () => ref.invalidate(listsProvider),
+                  excludeSemantics: true,
                   child: Material(
                     color: c.cardAlt,
                     borderRadius: BorderRadius.circular(999),
                     child: InkWell(
                       onTap: busy ? null : () => ref.invalidate(listsProvider),
                       borderRadius: BorderRadius.circular(999),
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(12, 9, 14, 9),
+                      child: Container(
+                        // B-17: a full 48 dp target.
+                        constraints: const BoxConstraints(minHeight: Dims.tap),
+                        padding: const EdgeInsets.fromLTRB(12, 0, 14, 0),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -143,7 +147,9 @@ class _ListRow extends StatelessWidget {
       child: Semantics(
         button: true,
         selected: selected,
-        label: '${list.name}${selected ? ', selected' : ''}',
+        label: list.name,
+        excludeSemantics: true,
+        onTap: onTap,
         child: Material(
           color: selected ? c.primarySoft : c.cardAlt,
           borderRadius: BorderRadius.circular(14),

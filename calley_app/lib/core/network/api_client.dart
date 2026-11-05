@@ -145,5 +145,13 @@ ApiException mapDioError(DioException e) => switch (e.type) {
     'Could not reach the Calley server. Check your connection and try again.',
     kind: ApiErrorKind.network,
   ),
+  // B-12: a pinned-certificate mismatch arrives as an "unknown" error
+  // wrapping a TLS handshake failure; say what it is.
+  _ when e.error is HandshakeException || e.error is TlsException =>
+    const ApiException(
+      'The Calley server presented an unexpected security certificate, so '
+      'the app did not connect. The certificate may have been renewed.',
+      kind: ApiErrorKind.network,
+    ),
   _ => ApiException(e.message ?? 'Something went wrong talking to the server.'),
 };

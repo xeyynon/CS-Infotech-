@@ -24,6 +24,7 @@ class AppTextField extends StatelessWidget {
     this.enabled = true,
     this.prefix,
     this.mono = false,
+    this.textCapitalization = TextCapitalization.none,
   });
 
   final String hint;
@@ -45,6 +46,8 @@ class AppTextField extends StatelessWidget {
   /// Numbers (phone, OTP) are set in the mono face.
   final bool mono;
 
+  final TextCapitalization textCapitalization;
+
   @override
   Widget build(BuildContext context) {
     final c = context.c;
@@ -60,6 +63,8 @@ class AppTextField extends StatelessWidget {
       onFieldSubmitted: onSubmitted,
       autofocus: autofocus,
       enabled: enabled,
+      textCapitalization: textCapitalization,
+      autocorrect: keyboardType != TextInputType.emailAddress,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       style: mono ? context.mono(15.5) : context.body(15.5),
       decoration: InputDecoration(

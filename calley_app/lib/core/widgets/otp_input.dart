@@ -3,8 +3,12 @@ import 'package:flutter/services.dart';
 
 import '../../app/theme.dart';
 
-/// Six boxes that behave like one field: typing advances, backspace retreats,
-/// a pasted 6-digit code fills all boxes. The value is reported whole.
+/// Six boxes drawn over ONE real text field (B-03, B-04, B-16).
+///
+/// A single field means typing, backspace on any soft keyboard, paste and
+/// SMS/one-time-code autofill all behave the way the platform already does,
+/// and assistive tech meets one labelled input instead of six blank ones.
+/// Tapping any box focuses the field.
 class OtpInput extends StatefulWidget {
   const OtpInput({
     super.key,
@@ -24,108 +28,119 @@ class OtpInput extends StatefulWidget {
 }
 
 class OtpInputState extends State<OtpInput> {
-  late final List<TextEditingController> _ctrls = List.generate(
-    widget.length,
-    (_) => TextEditingController(),
-  );
-  late final List<FocusNode> _nodes = List.generate(
-    widget.length,
-    (_) => FocusNode(),
-  );
+  final _ctrl = TextEditingController();
+  final _focus = FocusNode();
+  String _last = '';
 
-  String get value => _ctrls.map((c) => c.text).join();
+  String get value => _ctrl.text;
 
   void clear() {
-    for (final c in _ctrls) {
-      c.clear();
-    }
-    _nodes.first.requestFocus();
-    widget.onChanged('');
+    _ctrl.clear();
+    _focus.requestFocus();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl.addListener(_onText);
+    _focus.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
-    for (final c in _ctrls) {
-      c.dispose();
-    }
-    for (final n in _nodes) {
-      n.dispose();
-    }
+    _ctrl.dispose();
+    _focus.dispose();
     super.dispose();
   }
 
-  void _onChanged(int i, String text) {
-    final digits = text.replaceAll(RegExp(r'\D'), '');
-    if (digits.length > 1) {
-      // Paste: spread the digits from this box onwards.
-      for (var k = 0; k < digits.length && i + k < widget.length; k++) {
-        _ctrls[i + k].text = digits[k];
-      }
-      final next = (i + digits.length).clamp(0, widget.length - 1);
-      _nodes[next].requestFocus();
-    } else {
-      _ctrls[i].text = digits;
-      if (digits.isNotEmpty && i < widget.length - 1) {
-        _nodes[i + 1].requestFocus();
-      }
-    }
-    final v = value;
+  void _onText() {
+    final v = _ctrl.text;
+    if (v == _last) return;
+    _last = v;
+    setState(() {});
     widget.onChanged(v);
     if (v.length == widget.length) {
-      FocusScope.of(context).unfocus();
+      _focus.unfocus();
       widget.onCompleted?.call(v);
     }
   }
 
-  KeyEventResult _onKey(int i, FocusNode node, KeyEvent e) {
-    if (e is KeyDownEvent &&
-        e.logicalKey == LogicalKeyboardKey.backspace &&
-        _ctrls[i].text.isEmpty &&
-        i > 0) {
-      _ctrls[i - 1].clear();
-      _nodes[i - 1].requestFocus();
-      widget.onChanged(value);
-      return KeyEventResult.handled;
-    }
-    return KeyEventResult.ignored;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      label: 'One-time code, ${widget.length} digits',
-      child: Row(
-        children: [
-          for (var i = 0; i < widget.length; i++) ...[
-            if (i > 0) const SizedBox(width: 8),
-            Expanded(
-              child: SizedBox(
-                height: 58,
-                child: Focus(
-                  onKeyEvent: (node, e) => _onKey(i, node, e),
-                  child: TextField(
-                    controller: _ctrls[i],
-                    focusNode: _nodes[i],
-                    enabled: widget.enabled,
-                    autofocus: i == 0,
-                    textAlign: TextAlign.center,
-                    keyboardType: TextInputType.number,
-                    textInputAction: i == widget.length - 1
-                        ? TextInputAction.done
-                        : TextInputAction.next,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    style: context.mono(22, weight: FontWeight.w600),
-                    onChanged: (t) => _onChanged(i, t),
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                ),
+    final c = context.c;
+    final v = _ctrl.text;
+    final focused = _focus.hasFocus;
+    // The box that the next digit goes into.
+    final active = v.length.clamp(0, widget.length - 1);
+
+    return Stack(
+      children: [
+        // The real field: present for input and assistive tech, invisible.
+        Positioned.fill(
+          child: Opacity(
+            opacity: 0,
+            // Without this, Opacity(0) drops the field from the semantics tree.
+            alwaysIncludeSemantics: true,
+            child: TextField(
+              controller: _ctrl,
+              focusNode: _focus,
+              enabled: widget.enabled,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.done,
+              autofillHints: const [AutofillHints.oneTimeCode],
+              maxLength: widget.length,
+              showCursor: false,
+              enableInteractiveSelection: false,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(widget.length),
+              ],
+              decoration: InputDecoration(
+                counterText: '',
+                labelText: 'One-time code, ${widget.length} digits',
               ),
             ),
-          ],
-        ],
-      ),
+          ),
+        ),
+        // The drawn boxes. Hidden from assistive tech: the field above
+        // already says what it is and what has been typed.
+        ExcludeSemantics(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: widget.enabled ? () => _focus.requestFocus() : null,
+            child: Row(
+              children: [
+                for (var i = 0; i < widget.length; i++) ...[
+                  if (i > 0) const SizedBox(width: 8),
+                  Expanded(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 120),
+                      height: 58,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: c.input,
+                        borderRadius: BorderRadius.circular(Dims.fieldRadius),
+                        border: Border.all(
+                          color:
+                              focused && i == active && v.length < widget.length
+                              ? c.primary
+                              : Colors.transparent,
+                          width: 1.6,
+                        ),
+                      ),
+                      child: Text(
+                        i < v.length ? v[i] : '',
+                        style: context.mono(22, weight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

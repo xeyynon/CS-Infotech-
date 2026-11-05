@@ -4,16 +4,23 @@ import 'package:url_launcher/url_launcher.dart';
 
 /// Links the design points at. Kept in one place.
 abstract final class Links {
+  /// Shown in the copy as app.getcalley.com, as in the Figma file.
   static const webPanel = 'https://app.getcalley.com';
-  static const whatsapp = 'https://wa.me/917676286822';
+
+  /// Calley's support WhatsApp, as published on csquaretech.com.
+  static const whatsapp = 'https://wa.me/919971125511';
 
   /// Calley's own "Full setup of Calley Personal" tutorial.
   static const tutorialVideo = 'https://www.youtube.com/watch?v=hzwSizmvMD0';
-  static const terms = 'https://getcalley.com/terms';
-  static const privacy = 'https://getcalley.com/privacy';
-  static const about = 'https://getcalley.com';
-  static const playStore =
-      'https://play.google.com/store/apps/details?id=com.getcalley.app.calley';
+
+  // Real pages on getcalley.com (checked 2026-11-05).
+  static const terms = 'https://www.getcalley.com/terms-of-services/';
+  static const privacy = 'https://www.getcalley.com/privacy-policy/';
+  static const about =
+      'https://www.getcalley.com/what-is-calley-sales-auto-dialer/';
+  static const support = 'https://www.getcalley.com/contact-us/';
+  static const download =
+      'https://www.getcalley.com/download-sales-call-auto-dialer/';
 }
 
 typedef LaunchFn = Future<bool> Function(Uri uri, {LaunchMode mode});
@@ -43,13 +50,15 @@ class Launcher {
 
   /// Opens the phone dialer with the number filled in. Does not place the
   /// call itself: that needs CALL_PHONE permission and the user's consent.
-  Future<void> dial(BuildContext context, String phone) async {
+  /// Returns whether the dialer opened, so callers do not ask "how did the
+  /// call go?" about a call that never started (B-27).
+  Future<bool> dial(BuildContext context, String phone) async {
     final digits = phone.replaceAll(RegExp(r'[^\d+]'), '');
     if (digits.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No phone number on this record.')),
       );
-      return;
+      return false;
     }
     final ok = await _safe(
       Uri(scheme: 'tel', path: digits),
@@ -60,6 +69,7 @@ class Launcher {
         const SnackBar(content: Text('This device has no phone dialer.')),
       );
     }
+    return ok;
   }
 
   /// `launchUrl` throws on platforms with no url_launcher implementation.

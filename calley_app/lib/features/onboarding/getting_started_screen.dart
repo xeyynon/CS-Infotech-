@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../app/router.dart';
 import '../../app/theme.dart';
 import '../../core/providers.dart';
-import '../../core/utils/formatters.dart';
 import '../../core/utils/launchers.dart';
 import '../../core/widgets/cards.dart';
 import '../../core/widgets/primary_button.dart';
@@ -19,7 +18,6 @@ class GettingStartedScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.c;
     final user = ref.watch(sessionProvider);
-    final now = ref.watch(clockProvider)();
     final fromDrawer = context.canPop();
     return Scaffold(
       appBar: fromDrawer ? AppBar(title: const Text('Getting Started')) : null,
@@ -33,7 +31,7 @@ class GettingStartedScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     GreetingCard(
-                      eyebrow: greetingFor(now),
+                      eyebrow: 'Hello', // B-35: Figma wording
                       name: user?.firstName ?? 'there',
                       subline: user?.subscription ?? 'Calley',
                     ),
@@ -48,7 +46,7 @@ class GettingStartedScreen extends ConsumerWidget {
                             color: c.navy,
                             child: Text.rich(
                               TextSpan(
-                                text: 'If you are here for the first time, make sure you have uploaded the list to call from the Calley web panel at ',
+                                text: 'If you are here for the first time then ensure that you have uploaded the list to call from calley Web Panel hosted on ', // B-44
                                 children: [
                                   TextSpan(
                                     text: 'app.getcalley.com',
@@ -76,8 +74,7 @@ class GettingStartedScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Align(
-                      alignment: Alignment.centerLeft,
+                    Center(
                       child: TextButton.icon(
                         onPressed: () => ref
                             .read(launcherProvider)
@@ -121,6 +118,11 @@ class GettingStartedScreen extends ConsumerWidget {
 
 /// The "2 MINUTE CHALLENGE" video card. A poster drawn in the display face;
 /// a tap opens Calley's own setup video on YouTube.
+///
+/// B-45: a centred Column that grows with the text instead of a fixed-height
+/// Stack, so nothing runs under the play button at large text sizes. The
+/// play disc is outlined, not solid, so the blue "Start Calling Now" stays
+/// the one primary action on the screen.
 class _ChallengeThumbnail extends StatelessWidget {
   const _ChallengeThumbnail({required this.onTap});
 
@@ -132,50 +134,40 @@ class _ChallengeThumbnail extends StatelessWidget {
     return Semantics(
       button: true,
       label: 'Watch the 2 minute challenge video',
+      excludeSemantics: true,
+      onTap: onTap,
       child: InkWell(
         onTap: onTap,
         child: Container(
-          height: 200,
           width: double.infinity,
+          constraints: const BoxConstraints(minHeight: 200),
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 22),
           color: c.cardAlt,
-          child: Stack(
+          child: Column(
             children: [
-              Positioned(
-                left: 20,
-                top: 22,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Tutorial · 2:00', style: context.eyebrow()),
-                    const SizedBox(height: 8),
-                    Text(
-                      '2 minute\nchallenge',
-                      style: context.display(
-                        34,
-                        weight: FontWeight.w800,
-                        height: 0.98,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Upload a list, sync, dial. Watch how.',
-                      style: context.body(13, color: c.textSecondary),
-                    ),
-                  ],
-                ),
+              Text('TUTORIAL · 2:00', style: context.eyebrow()),
+              const SizedBox(height: 10),
+              Text(
+                '2 Minute Challenge',
+                textAlign: TextAlign.center,
+                style: context.display(28, weight: FontWeight.w800),
               ),
-              Positioned(
-                right: 20,
-                bottom: 20,
-                child: Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: c.text,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(Icons.play_arrow_rounded, color: c.bg, size: 30),
+              const SizedBox(height: 8),
+              Text(
+                'Upload a list, sync, dial. Watch how.',
+                textAlign: TextAlign.center,
+                style: context.body(13.5, color: c.textSecondary),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: c.card,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: c.border, width: 1.5),
                 ),
+                child: Icon(Icons.play_arrow_rounded, color: c.text, size: 30),
               ),
             ],
           ),
