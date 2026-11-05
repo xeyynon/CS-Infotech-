@@ -186,14 +186,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           const SizedBox(height: 8),
           ErrorView(error: _error!, onRetry: _submit),
         ],
-        const SizedBox(height: 10),
+        const SizedBox(height: 14),
+        PrimaryButton(label: 'Sign Up', busy: _busy, onPressed: _submit),
+        const SizedBox(height: 6),
         AuthSwitchLine(
           text: 'Already have an account?',
           action: 'Sign In',
           onTap: () => context.go(Routes.login),
         ),
-        const SizedBox(height: 6),
-        PrimaryButton(label: 'Sign Up', busy: _busy, onPressed: _submit),
       ],
     );
   }

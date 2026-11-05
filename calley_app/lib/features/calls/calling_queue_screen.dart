@@ -677,7 +677,11 @@ class _RecordRow extends StatelessWidget {
     bool mono = false,
   }) {
     final c = context.c;
-    final text = value == null || value.isEmpty ? noData : value;
+    // A row of dashes tells the agent nothing; leave it out.
+    if (value == null || value.isEmpty || value == noData) {
+      return const SizedBox.shrink();
+    }
+    final text = value;
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(

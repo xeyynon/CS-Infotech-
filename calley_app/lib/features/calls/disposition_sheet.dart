@@ -13,6 +13,24 @@ const List<String> kDispositions = [
   'Negative',
 ];
 
+/// A face (or a flag) beside each word, so the five options are told apart
+/// at a glance. Never colour alone: the word is always there.
+IconData _iconFor(String d) => switch (d) {
+  'Very positive' => Icons.sentiment_very_satisfied_rounded,
+  'Satisfied' => Icons.sentiment_satisfied_rounded,
+  'Needs follow-up' => Icons.flag_rounded,
+  'Neutral' => Icons.sentiment_neutral_rounded,
+  'Negative' => Icons.sentiment_dissatisfied_rounded,
+  _ => Icons.circle_outlined,
+};
+
+Color _toneFor(String d, CalleyColors c) => switch (d) {
+  'Very positive' || 'Satisfied' => c.success,
+  'Needs follow-up' => c.scheduled,
+  'Negative' => c.danger,
+  _ => c.textMuted,
+};
+
 /// Asks "How did the call go?". Returns the chosen outcome, or null if the
 /// sheet was dismissed. [current] marks an outcome already logged, so the
 /// sheet doubles as "change outcome".
@@ -69,6 +87,8 @@ Future<String?> showDispositionSheet(
                     ),
                     child: Row(
                       children: [
+                        Icon(_iconFor(d), size: 22, color: _toneFor(d, c)),
+                        const SizedBox(width: 14),
                         Expanded(child: Text(d)),
                         if (d == current)
                           Icon(Icons.check_rounded, size: 20, color: c.primary),

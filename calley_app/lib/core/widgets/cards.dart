@@ -39,12 +39,16 @@ class LedgerEntry {
     required this.value,
     required this.color,
     this.onTap,
+    this.caption,
   });
 
   final String label;
   final int value;
   final Color color;
   final VoidCallback? onTap;
+
+  /// Small text after the figure, e.g. the share of the list.
+  final String? caption;
 }
 
 /// The call-status figures as one strip of columns: a coloured dot and a
@@ -68,7 +72,9 @@ class StatLedger extends StatelessWidget {
               Expanded(
                 child: Semantics(
                   button: entries[i].onTap != null,
-                  label: '${entries[i].label}, ${entries[i].value} calls',
+                  label:
+                      '${entries[i].label}, ${entries[i].value} calls'
+                      '${entries[i].caption == null ? '' : ', ${entries[i].caption}'}',
                   onTap: entries[i].onTap, // B-02
                   child: ExcludeSemantics(
                     child: InkWell(
@@ -104,9 +110,31 @@ class StatLedger extends StatelessWidget {
                               ],
                             ),
                             const SizedBox(height: 8),
-                            Text(
-                              '${entries[i].value}',
-                              style: context.mono(26, weight: FontWeight.w600),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline: TextBaseline.alphabetic,
+                              children: [
+                                Text(
+                                  '${entries[i].value}',
+                                  style: context.mono(
+                                    26,
+                                    weight: FontWeight.w600,
+                                  ),
+                                ),
+                                if (entries[i].caption != null) ...[
+                                  const SizedBox(width: 6),
+                                  Flexible(
+                                    child: Text(
+                                      entries[i].caption!,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: context.mono(
+                                        12.5,
+                                        color: c.textMuted,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                           ],
                         ),

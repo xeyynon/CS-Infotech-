@@ -501,12 +501,12 @@ class _Stats extends StatelessWidget {
     // Three groups that do not overlap, so the ring adds up to the list
     // (the server's own counts count rescheduled calls twice).
     final segments = [
-      DonutSegment(label: 'Done', value: details.doneCount, color: c.done),
       DonutSegment(
         label: 'Pending',
         value: details.pendingCount,
         color: c.pending,
       ),
+      DonutSegment(label: 'Done', value: details.doneCount, color: c.done),
       DonutSegment(
         label: 'Scheduled',
         value: details.scheduledCount,
@@ -516,10 +516,11 @@ class _Stats extends StatelessWidget {
     final total = details.total;
     return Column(
       children: [
-        // Centred: the ring is the one focal point of this screen, with its
-        // legend directly underneath so the eye does not travel sideways.
+        // Centred: the ring is the one focal point of this screen. Its
+        // key is the ledger right below (same colours, same order, with the
+        // share of the list), so the figures are not shown twice.
         AppCard(
-          padding: const EdgeInsets.fromLTRB(18, 22, 18, 18),
+          padding: const EdgeInsets.fromLTRB(18, 22, 18, 22),
           child: LayoutBuilder(
             builder: (context, box) {
               final size = (box.maxWidth * 0.55).clamp(140.0, 190.0);
@@ -539,42 +540,6 @@ class _Stats extends StatelessWidget {
                         size: size,
                         centerLabel: 'CONTACTS',
                       ),
-                    const SizedBox(height: 18),
-                    // B-40: wraps instead of cutting words at large text sizes.
-                    Wrap(
-                      alignment: WrapAlignment.center,
-                      spacing: 18,
-                      runSpacing: 8,
-                      children: [
-                        for (final s in segments)
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 9,
-                                height: 9,
-                                decoration: BoxDecoration(
-                                  color: s.color,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 7),
-                              Text(
-                                s.label,
-                                style: context.body(
-                                  13.5,
-                                  color: c.textSecondary,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                fmtShare(s.value, total),
-                                style: context.mono(13.5),
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
                   ],
                 ),
               );
@@ -587,6 +552,7 @@ class _Stats extends StatelessWidget {
             LedgerEntry(
               label: 'Pending',
               value: details.pendingCount,
+              caption: fmtShare(details.pendingCount, total),
               color: c.pending,
               onTap: () => onStatTap(CallStatus.pending),
             ),
@@ -594,12 +560,14 @@ class _Stats extends StatelessWidget {
             LedgerEntry(
               label: 'Done',
               value: details.doneCount,
+              caption: fmtShare(details.doneCount, total),
               color: c.done,
               onTap: () => onStatTap(CallStatus.called),
             ),
             LedgerEntry(
               label: 'Scheduled',
               value: details.scheduledCount,
+              caption: fmtShare(details.scheduledCount, total),
               color: c.scheduled,
               onTap: () => onStatTap(CallStatus.rescheduled),
             ),

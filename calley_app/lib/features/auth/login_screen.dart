@@ -164,14 +164,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           const SizedBox(height: 8),
         ],
         const SizedBox(height: 6),
+        // The button follows the fields it submits; the way to the other
+        // form comes after it (the next step of the task, then the detour).
+        PrimaryButton(label: 'Sign In', busy: _busy, onPressed: _submit),
+        const SizedBox(height: 6),
         AuthSwitchLine(
           text: "Don't have an account?",
           action: 'Sign Up',
           onTap: () => context.go(Routes.register),
         ),
-        const SizedBox(height: 6),
-        PrimaryButton(label: 'Sign In', busy: _busy, onPressed: _submit),
-        const SizedBox(height: 20),
+        const SizedBox(height: 14),
         _DemoCard(onUse: _useDemo),
       ],
     );
