@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/router.dart';
 import '../../app/theme.dart';
 import '../../core/providers.dart';
+import '../../core/widgets/calley_loader.dart';
 import '../../core/widgets/cards.dart';
 import '../../core/widgets/status_views.dart';
 import 'progress_stats.dart';
@@ -59,13 +60,8 @@ class _Body extends ConsumerWidget {
     final dispositions = ref.watch(dispositionsProvider);
 
     if (details.isLoading) {
-      return ListView(
-        padding: const EdgeInsets.all(Dims.page),
-        children: const [
-          SkeletonBox(height: 190, radius: Dims.cardRadius),
-          SizedBox(height: Dims.gap),
-          SkeletonBox(height: 140, radius: Dims.cardRadius),
-        ],
+      return const Center(
+        child: CalleyLoader(label: 'Working out your progress…'),
       );
     }
     if (details.hasError) {

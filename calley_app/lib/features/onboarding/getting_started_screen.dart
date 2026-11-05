@@ -34,6 +34,7 @@ class GettingStartedScreen extends ConsumerWidget {
                       eyebrow: 'Hello', // B-35: Figma wording
                       name: user?.firstName ?? 'there',
                       subline: user?.subscription ?? 'Calley',
+                      initial: user?.initial ?? '?',
                     ),
                     const SizedBox(height: Dims.gap),
                     AppCard(
