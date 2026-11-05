@@ -52,7 +52,7 @@ Made for the Flutter Mobile App Developer machine test at C S Tech Infosolutions
 | **Version** | `1.0.0 (build 1010)`, shown in the app's drawer and in Send logs, and tied to the git tag `build-1010` |
 | **API status** | The supplied mock API returns 404 on every endpoint, so the app falls back to clearly labelled **sample data**. See [why](#why-the-app-uses-demo-data) |
 | **Demo login** | `demo@getcalley.com` / `Demo@1234` (one tap on the login screen) |
-| **Demo video** | [`docs/demo/calley_demo.mp4`](docs/demo/calley_demo.mp4): 2 min 25 s, recorded on the phone, from the login screen |
+| **Demo video** | [`docs/demo/calley_demo.mp4`](docs/demo/calley_demo.mp4): 1 min 8 s, recorded on the phone, from the login screen, with the idle waits cut |
 | **Quality** | `flutter analyze` clean · 81 unit and behaviour tests · 52 snapshot tests · 47 audited bugs fixed |
 
 ## Try it in two minutes
