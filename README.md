@@ -98,20 +98,19 @@ sign in with the demo account → *Getting Started* (play the tutorial inside th
 
 ```mermaid
 flowchart LR
-    A([Open app]) --> B[Choose language]
+    A[Open app] --> B[Choose language]
     B --> C[Register]
     C --> D[OTP verification]
     D --> E[Login]
-    E --> F[Getting Started]
+    C -->|already registered| E
+    E -->|sign in or demo account| F[Getting Started]
     F -->|Start Calling Now| G[Dashboard]
     G -->|no list yet| H[Pick a calling list]
     H --> I[Dashboard with ring and ledger]
     I -->|Start Calling Now| J[Calling queue]
-    J -->|Call next| K[[Phone dialer opens]]
-    K --> L[How did the call go?]
+    J -->|Call next| K[Phone dialer opens]
+    K --> L[Log how the call went]
     L --> J
-    C -. already registered .-> E
-    E -. demo account .-> F
 ```
 
 ### 2. The calling loop (the part an agent repeats fifty times)
@@ -122,17 +121,15 @@ sequenceDiagram
     participant Queue as Calling queue
     participant Dialer as Phone dialer
     participant Store as Outcomes on this phone
-    Agent->>Queue: Tap "Call next · Sherri"
+    Agent->>Queue: Tap Call next
     Queue->>Dialer: Open with the number filled in
-    Note over Queue,Dialer: Opens the dial pad only. The app never places a call by itself
+    Note over Queue,Dialer: Dial pad only - the app never places a call itself
     Dialer-->>Queue: Agent comes back
-    Queue->>Agent: "How did the call go?" with five outcomes
+    Queue->>Agent: How did the call go - five outcomes
     Agent->>Store: Pick one
-    Store-->>Queue: Contact leaves "To call", progress updates
-    Queue->>Agent: Snackbar "Undo" for 6 s, button now says "Call next · Colleen"
-    opt Changed mind
-        Agent->>Store: Undo
-    end
+    Store-->>Queue: Contact leaves To call and progress updates
+    Queue->>Agent: Undo is offered for 6 seconds
+    Agent->>Store: Undo if they changed their mind
 ```
 
 The queue asks about the call only if the dialer actually opened, so a failed launch never produces a question about a call that did not happen.
@@ -141,18 +138,19 @@ The queue asks about the call only if the dialer actually opened, so a failed la
 
 ```mermaid
 flowchart TD
-    S([A screen needs data]) --> R{Data source}
+    S[A screen needs data] --> R{Data source}
     R -->|Server| Q[Call the real API]
     R -->|Sample| M[Read the bundled examples]
     Q -->|success| OK[Show the data]
     Q -->|failure| E[Say why in plain words]
     E --> E1[Retry]
     E --> E2[Use sample data]
+    E1 --> Q
     E2 --> M
-    M --> B[Show the data with a banner on every screen: Sample data]
+    M --> B[Show the data with a banner on every screen]
     B --> T[Try server switches back]
     T --> Q
-    D([Demo login]) --> M
+    D[Demo login] --> M
 ```
 
 Nothing is faked silently: a failure is shown as a failure, and sample data is always labelled.
@@ -253,17 +251,21 @@ The API's own numbers overlap (the 11 rescheduled calls are also among the 23 ca
 
 ```mermaid
 flowchart TB
-    subgraph UI["Screens (features/)"]
-        direction LR
-        F1[auth] --- F2[onboarding] --- F3[dashboard] --- F4[calls] --- F5[drawer features]
-    end
-    UI --> P["Riverpod providers: session, selected list, data source, outcomes, reminders, clock, launcher"]
-    P --> API{{"CalleyApi (interface)"}}
-    API --> R["RemoteCalleyApi: dio, 10 s timeouts, pinned certificate"]
-    API --> S["SampleCalleyApi: bundled JSON from the Postman examples"]
-    P --> ST[("shared_preferences: language, theme, session, selected list")]
-    UI --> W["Shared widgets and the design system"]
-    P --> L["Launcher: dialer, browser, share, mail"]
+    UI[Screens - auth, onboarding, dashboard, calls, drawer features]
+    W[Shared widgets and the design system]
+    P[Riverpod providers - session, selected list, data source, outcomes, reminders, clock, launcher]
+    API[CalleyApi interface]
+    R[RemoteCalleyApi - dio, 10 second timeouts, pinned certificate]
+    S[SampleCalleyApi - bundled JSON from the Postman examples]
+    ST[Saved preferences - language, theme, session, selected list]
+    L[Launcher - dialer, browser, share, mail]
+    UI --> P
+    UI --> W
+    P --> API
+    API --> R
+    API --> S
+    P --> ST
+    P --> L
 ```
 
 | Layer | Notes |
@@ -341,13 +343,13 @@ Every change is either a **build** (a person using the app would notice it) or a
 
 ```mermaid
 flowchart LR
-    C([Change made]) --> Q{Would a user notice?}
-    Q -->|Yes| B["Build N: commit + report in MD/builds + changelog entry"]
-    Q -->|No| I["InBul NN: commit with tests, docs or tooling"]
-    B --> N["scripts/changelog.mjs stamps N into pubspec and build_info.dart"]
+    C[Change made] --> Q{Would a user notice}
+    Q -->|Yes| B[Build N - commit, report in MD builds, changelog entry]
+    Q -->|No| I[InBul NN - commit with tests, docs or tooling]
+    B --> N[changelog script stamps N into pubspec and build_info]
     N --> T[Tag build-N]
     I --> T2[Tag InBulNN]
-    T --> V[Drift test: pubspec = build_info = tag]
+    T --> V[Drift test checks pubspec equals build_info equals tag]
     T --> PUSH[Push branch and tags]
     T2 --> PUSH
 ```
