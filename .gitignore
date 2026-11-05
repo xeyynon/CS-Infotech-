@@ -13,3 +13,7 @@ Thumbs.db
 *.keystore
 *.jks
 key.properties
+
+# Large hand-over files, attached to the submission by hand, not committed
+recording/
+release/

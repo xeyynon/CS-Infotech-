@@ -66,7 +66,7 @@ Requires Flutter 3.35+ (built with 3.47 / Dart 3.13). Android `minSdk` is Flutte
 | Register | 02 | Name, email, password, +91 mobile, T&C; validates before sending; `POST /auth/register` then `POST /auth/send-otp` |
 | OTP | 03 | Six boxes that paste, auto-advance and backspace; resend with a 30 s timer; `POST /auth/verify-otp` |
 | Login | 04 | `POST /auth/login`; session persisted; wrong password clears the field |
-| Getting started | 05 | Greeting, the web-panel note, the tutorial card (opens YouTube), WhatsApp, Start Calling Now |
+| Getting started | 05 | Greeting, the web-panel note, the tutorial card (plays in the app, or opens YouTube), WhatsApp, Start Calling Now |
 | Dashboard, no list | 06 | "Load number to call" or "Choose a calling list"; `GET /list?userId=` |
 | Calling lists | 07 | Bottom sheet and Settings section with Refresh; selection persisted |
 | Dashboard, active list | 08 | `GET /list/{id}`: ring chart, Pending/Done/Scheduled ledger, counts as the server sends them |

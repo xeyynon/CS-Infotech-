@@ -1,3 +1,5 @@
+import 'package:calley_app/features/calls/disposition_sheet.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../snapshots/snapshot_harness.dart';
@@ -43,4 +45,24 @@ void main() {
     expect(find.text('24%'), findsOneWidget); // 12 of 50
     expect(find.text('22%'), findsOneWidget); // 11 of 50
   });
+
+  testWidgets(
+    'the Undo snackbar goes away by itself (it used to stay forever)',
+    (tester) async {
+      await pumpApp(
+        tester,
+        location: '/reminders',
+        prefs: signedInPrefs(withList: true),
+      );
+      await tester.tap(find.byIcon(Icons.call_rounded).first);
+      await settle(tester, frames: 4);
+      await tester.tap(find.text(kDispositions.first));
+      await settle(tester, frames: 4);
+      expect(find.text('Undo'), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 8));
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.text('Undo'), findsNothing);
+    },
+  );
 }
