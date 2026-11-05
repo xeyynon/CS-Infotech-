@@ -1,4 +1,4 @@
-# bugfixed.md — what happened to every bug in [bugs.md](bugs.md)
+# bugfixed.md: what happened to every bug in [bugs.md](bugs.md)
 
 Fixed on 2026-11-05 in the build after `build-1000`. Checks after the fixes: `flutter analyze` 0 issues; `flutter test` **69 passed** (37 unit/router + 32 snapshots, regenerated and reviewed by eye).
 
@@ -14,7 +14,7 @@ Fixed on 2026-11-05 in the build after `build-1000`. Checks after the fixes: `fl
 | B-08 | S2 | Fixed | AuthScaffold shows SampleDataBanner; Register keeps the send-otp message in `pendingSignupProvider` and the OTP screen shows it ('Sample mode: any 6 digits verify'). | Code review; snapshot 12 shows the banner. |
 | B-09 | S2 | Fixed | `CallRecord.isRescheduled` (status rescheduled OR rescheduledAt set). The Scheduled filter, the calendar tab and the Scheduled stat now find the 11 records. | Unit test 'a called record with a rescheduledAt counts as scheduled'; queue chips show Scheduled 11. |
 | B-10 | S3 | Fixed | `test/**/failures/` added to calley_app/.gitignore. | git status after a failing golden run. |
-| B-11 | S3 | Fixed | Light textMuted #656975, danger #C0302F, success #167A47; dark textMuted #8D919C — all ≥4.5:1 on their surfaces. | Contrast computed per pair (noted in theme.dart comments). |
+| B-11 | S3 | Fixed | Light textMuted #656975, danger #C0302F, success #167A47; dark textMuted #8D919C, all ≥4.5:1 on their surfaces. | Contrast computed per pair (noted in theme.dart comments). |
 | B-12 | S3 | Fixed | mapDioError recognises a TLS HandshakeException/TlsException and says the certificate was unexpected (possibly renewed). | Unit test 'messages never contain a URL' still green; code review. |
 | B-13 | S3 | Fixed (partly by design, DEC-015) | Partly by design: the session is kept (signing someone out because they tapped 'Use sample data' mid-task would be worse). Logged outcomes are cleared on a data-source switch, and lists/details refetch because they watch apiProvider. Recorded as DEC-015. | Code review. |
 | B-14 | S3 | Fixed | signOut invalidates `pendingSignupProvider`; a successful login clears it. | Code review. |
@@ -49,7 +49,7 @@ Fixed on 2026-11-05 in the build after `build-1000`. Checks after the fixes: `fl
 | B-43 | S3 | Fixed | First run says 'Choose Your Language' and 'Select', as in Figma 01. | Snapshot 01. |
 | B-44 | S3 | Fixed | Getting Started instruction restored to the Figma sentence. | Snapshot 05. |
 | B-45 | S3 | Fixed | Tutorial card is a centred Column with minHeight 200 that grows with text; play disc outlined. | Snapshot 05. |
-| B-46 | S3 | Fixed | Data source is a SwitchListTile 'Use sample data' — one control, one label, whole row toggles. | Snapshot 07b. |
+| B-46 | S3 | Fixed | Data source is a SwitchListTile 'Use sample data'; one control, one label, whole row toggles. | Snapshot 07b. |
 | B-47 | S3 | Fixed | `--pending` rebuilds the report when the title changes (with a warning); keeps hand edits when the title is the same. | Ran during this build's commit. |
 
 ## UX/HCI changes made in the same pass
@@ -57,7 +57,7 @@ Fixed on 2026-11-05 in the build after `build-1000`. Checks after the fixes: `fl
 From the 48 judged HCI findings (scores in the audit output). Applied:
 
 - **Centring** (Gestalt / single focal axis): logo, title and instruction on Register, OTP, Login and Language; the ring chart with its legend underneath; empty states; sheet headings; the tutorial card and the web-panel link. Forms, lists and the ledger stay left-aligned for scanning.
-- **Counts that add up**: the server's 27 + 23 + 11 = 61 double-counts the 11 rescheduled calls (they are also 'called'). The ring and ledger now show disjoint groups — Pending 27 · Done 12 · Scheduled 11 = 50 contacts — with a one-line note.
+- **Counts that add up**: the server's 27 + 23 + 11 = 61 double-counts the 11 rescheduled calls (they are also 'called'). The ring and ledger now show disjoint groups. Pending 27 · Done 12 · Scheduled 11 = 50 contacts, with a one-line note.
 - **The calling loop** (task flow for an agent with 50 numbers): queue opens on 'To call'; a thumb-zone 'Call next · Sherri' button; outcome sheet after each call with Undo in a snackbar; 'Log outcome' / 'Change outcome' without dialling; 'n of 50 logged' with a progress bar; logged contacts drop out of 'To call'.
 - **Error states by cause**: 404 → 'Not available on the Calley test server' with 'Use sample data' as the primary button; network/timeout get their own words and icons; wrong password/OTP no longer show a cloud icon or 'Request refused'.
 - **Search clear button**, and an empty-state 'Clear search' action.

@@ -1,4 +1,4 @@
-# Calley — automatic call dialer (Flutter)
+# Calley: automatic call dialer (Flutter)
 
 A Flutter build of the Calley mobile app's first ten screens, made for the C S Tech Infosolutions Flutter machine test. Nine screens follow the Figma file; the tenth, the calling queue, is what "Start Calling Now" leads to.
 
@@ -80,7 +80,7 @@ Release APKs, one per CPU type: `flutter build apk --release --split-per-abi` (a
 | Send Logs | 09 | Shows the exact report (version, platform, data source, list counts, outcome totals, **no names or numbers**), then Email to support or Copy |
 | Share App | 09 | System share sheet with the download link; copies the message if the phone has no share sheet |
 | Cancel Subscription | 09 | Says plans are billed outside the app; Keep my plan (first), Manage on Google Play, Contact support |
-| Calling queue | — | Search and status filters, one tap opens the dialer, then a disposition sheet (kept for the session: the API has no write endpoint) |
+| Calling queue | - | Search and status filters, one tap opens the dialer, then a disposition sheet (kept for the session: the API has no write endpoint) |
 
 Pull to refresh on every data screen. Light and dark themes (Settings → Appearance).
 
@@ -91,9 +91,9 @@ lib/
   app/        router (go_router, session gate), theme (tokens, three bundled fonts)
   core/       network (dio client + pinned cert, CalleyApi: remote and sample)
               storage (shared_preferences), providers (Riverpod), widgets, utils
-  models/     User, CallingList, ListDetails, CallRecord — fromJson only, nothing invented
+  models/     User, CallingList, ListDetails, CallRecord, fromJson only, nothing invented
   features/   language, auth, onboarding, dashboard, lists, calls, settings, drawer
-assets/       fonts (Inter, Bricolage Grotesque, IBM Plex Mono — OFL), mock JSON
+assets/       fonts (Inter, Bricolage Grotesque, IBM Plex Mono. OFL), mock JSON
 test/         snapshot harness and tests
 ```
 

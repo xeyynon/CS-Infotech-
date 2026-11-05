@@ -1,4 +1,4 @@
-# version_control.md — how changes are numbered, recorded and pushed
+# version_control.md: how changes are numbered, recorded and pushed
 
 Same scheme as Surya's other projects (Dukaan Dost, TARANG): **builds** and **InBuls**, pinned by git tags. Read this before committing.
 
@@ -9,7 +9,7 @@ Same scheme as Surya's other projects (Dukaan Dost, TARANG): **builds** and **In
 | **Build** | Something the **reviewer sees in the app**: a screen, a flow, how an error shows, the APK | `build-N` | 1000, 1001, … |
 | **InBul** (internal build) | Everything else: `MD/` docs, research, scripts, tests, snapshots, tooling | `InBulNN` | 01, 02, … |
 
-The **git tag is the source of truth** for the number. A commit title never carries "(Build N)". Tags are lightweight and are never moved or renumbered. Builds are **batched** — about ten fixes to a build — so the list stays meaningful.
+The **git tag is the source of truth** for the number. A commit title never carries "(Build N)". Tags are lightweight and are never moved or renumbered. Builds are **batched**: about ten fixes to a build, so the list stays meaningful.
 
 ```
 change made

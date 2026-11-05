@@ -1,4 +1,4 @@
-# decisions.md — decision log
+# decisions.md: decision log
 
 Format: ID · date · decision · why · consequences. Append-only; supersede with a new entry.
 
@@ -9,9 +9,9 @@ Format: ID · date · decision · why · consequences. Append-only; supersede wi
 **Why:** Same layout as the previous project; works with any editor and with Claude Code recall.
 **Consequence:** Update `tasks.md` and `decisions.md` as work proceeds; `calley_MASTER.md` is the tie-breaker.
 
-## DEC-002 · 2026-11-04 · State management: **Riverpod** (proposed — confirm before coding)
+## DEC-002 · 2026-11-04 · State management: **Riverpod** (proposed: confirm before coding)
 **Decision:** `flutter_riverpod` with `AsyncNotifier`s per feature.
-**Why:** Compile-safe, testable, no `BuildContext` plumbing, and idiomatic for "fetch → loading/error/data" screens, which is 80 % of this app. Provider is acceptable if the candidate is more fluent in it — both prior public submissions used Provider, so Riverpod is a mild differentiator.
+**Why:** Compile-safe, testable, no `BuildContext` plumbing, and idiomatic for "fetch → loading/error/data" screens, which is 80 % of this app. Provider is acceptable if the candidate is more fluent in it; both prior public submissions used Provider, so Riverpod is a mild differentiator.
 **Alternatives rejected:** Bloc (too much ceremony for 9 screens), GetX (reviewers often dislike it), setState only (no shared session state).
 
 ## DEC-003 · 2026-11-04 · HTTP client: **dio**

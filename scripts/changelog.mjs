@@ -90,15 +90,15 @@ function writeReport(n, { title, summary, why, verified, next }) {
       '',
       '## Why',
       '',
-      why || '—',
+      why || '-',
       '',
       '## How it was checked',
       '',
-      verified || '—',
+      verified || '-',
       '',
       '## Next improvement',
       '',
-      next || '—',
+      next || '-',
     ].join('\n');
   }
   const files = stagedFiles();
@@ -156,7 +156,7 @@ function regenChangelog() {
   // No "pending" marker: the changelog is written before the commit that
   // --tag pins, and --tag must not touch files.
   for (const r of reports) {
-    lines.push(`## Build ${r.n} — ${r.title}`, '', `${r.date}`, '', r.summary, '', `Report: [MD/builds/build-${r.n}.md](MD/builds/build-${r.n}.md)`, '');
+    lines.push(`## Build ${r.n}: ${r.title}`, '', `${r.date}`, '', r.summary, '', `Report: [MD/builds/build-${r.n}.md](MD/builds/build-${r.n}.md)`, '');
   }
   writeFileSync(CHANGELOG, lines.join('\n'));
 }

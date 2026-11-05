@@ -48,7 +48,7 @@ class _DeadApi implements CalleyApi {
   Future<ListDetails> getListDetails(String listId) async => _fail();
 }
 
-/// Lists exist but no details yet — exercises the "choose a list" card.
+/// Lists exist but no details yet, exercises the "choose a list" card.
 class _ListsOnlyApi extends SampleCalleyApi {
   const _ListsOnlyApi()
     : super(latency: Duration.zero, loadText: loadMockFromDisk);

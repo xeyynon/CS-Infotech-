@@ -1,4 +1,4 @@
-# bugs.md — bug register
+# bugs.md: bug register
 
 Found by an audit run on 2026-11-05: 8 bug-finding lenses (state, routing, network, layout, forms, models, accessibility, tooling) plus 3 fresh-eyes finders, merged to 67 distinct claims. Each claim then went to **three independent verifiers told to refute it** (framework semantics, reproduction, impact). A claim stands only if at least two of the three could not refute it. **47 stood; 20 were refuted** (listed at the end so nobody re-raises them).
 

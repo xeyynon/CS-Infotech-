@@ -1,6 +1,6 @@
-# api_reference.md — Calley mock REST API ("Mock API V2")
+# api_reference.md: Calley mock REST API ("Mock API V2")
 
-> **Official collection found (2026-11-05):** https://documenter.getpostman.com/view/38199901/2sB34Zpiy9 — saved as [assets/postman-mock-api-v2.json](assets/postman-mock-api-v2.json). It confirms the base URL, the six endpoints and the bodies below. Examples: register → 201 `{"message":"User registered"}`; login → 200 `{"message":"Login successful","user":{"_id","username","email"}}`; send-otp → `{"message":"OTP sent"}`; verify-otp → `{"message":"OTP Verfied"}`; `GET /list` → **one object** `{_id,name,agents,clientId}`, not an array; list details → exactly `assets/sample-list-details.json`. Example login password is `123`, so sign-in must not enforce a length (fixed: `Validators.loginPassword`). **The host still answers 404 on every documented path** (re-checked 2026-11-05).
+> **Official collection found (2026-11-05):** https://documenter.getpostman.com/view/38199901/2sB34Zpiy9, saved as [assets/postman-mock-api-v2.json](assets/postman-mock-api-v2.json). It confirms the base URL, the six endpoints and the bodies below. Examples: register → 201 `{"message":"User registered"}`; login → 200 `{"message":"Login successful","user":{"_id","username","email"}}`; send-otp → `{"message":"OTP sent"}`; verify-otp → `{"message":"OTP Verfied"}`; `GET /list` → **one object** `{_id,name,agents,clientId}`, not an array; list details → exactly `assets/sample-list-details.json`. Example login password is `123`, so sign-in must not enforce a length (fixed: `Validators.loginPassword`). **The host still answers 404 on every documented path** (re-checked 2026-11-05).
 
 
 > **Provenance:** NOT on the Notion page. Reconstructed from two prior candidates' public repos
@@ -19,10 +19,10 @@
 | 2 | POST | `/auth/login` | `{ "email", "password" }` | 200, `{ "user": { "_id", "username", "email", "phone"?, "subscription"? } }` *(inferred from parser)* |
 | 3 | POST | `/auth/send-otp` | `{ "email" }` | 200, `{ "message": ... }` |
 | 4 | POST | `/auth/verify-otp` | `{ "email", "otp" }` | 200, `{ "message": ... }` |
-| 5 | GET | `/list?userId={userId}` | — | 200, **array** of CallingList (one candidate also handled a single object) |
-| 6 | GET | `/list/{listId}` | — | 200, ListDetails |
+| 5 | GET | `/list?userId={userId}` | - | 200, **array** of CallingList (one candidate also handled a single object) |
+| 6 | GET | `/list/{listId}` | - | 200, ListDetails |
 
-## Models (from candidates' mock data — likely mirrors the real Postman examples)
+## Models (from candidates' mock data: likely mirrors the real Postman examples)
 
 ### User
 ```json
@@ -85,12 +85,12 @@
 ```
 
 Parsing gotchas:
-- Keys are **PascalCase with spaces** (`"Other Phone 1"`) — map explicitly, don't rely on codegen defaults.
+- Keys are **PascalCase with spaces** (`"Other Phone 1"`): map explicitly, don't rely on codegen defaults.
 - `Phone` is a **number**, not a string → `toString()` before `tel:`.
 - `calledAt`, `rescheduledAt`, `duration`, `feedback` are **nullable**.
 - `status` ∈ `pending | called | rescheduled`. Map to UI: Pending / Done / Schedule.
 - `feedback` values seen: "Very positive", "Satisfied", "Needs follow-up", "Neutral", "Negative" → use as disposition options.
-- Note `pending + called + rescheduled = 61` while `calls.length = 50` in the sample — counts and records don't reconcile. Show the API counts in the stat cards and `calls.length` in the "N CALLS" badge; don't try to recompute.
+- Note `pending + called + rescheduled = 61` while `calls.length = 50` in the sample; counts and records don't reconcile. Show the API counts in the stat cards and `calls.length` in the "N CALLS" badge; don't try to recompute.
 
 ## Dart sketch
 

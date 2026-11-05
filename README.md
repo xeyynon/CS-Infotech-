@@ -1,6 +1,6 @@
 <div align="center">
 
-# Calley — Automatic Call Dialer
+# Calley: Automatic Call Dialer
 
 **A Flutter build of the Calley mobile app: onboarding, dashboard, calling queue and the drawer features.**
 Made for the Flutter Mobile App Developer machine test at C S Tech Infosolutions Pvt. Ltd.
@@ -9,7 +9,7 @@ Made for the Flutter Mobile App Developer machine test at C S Tech Infosolutions
 ![Dart](https://img.shields.io/badge/Dart-3.13-0175C2?logo=dart&logoColor=white)
 ![Platform](https://img.shields.io/badge/Android-verified_on_device-3DDC84?logo=android&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-81_unit_+_52_snapshot-1F5EFF)
-![Build](https://img.shields.io/badge/build-1009-0E1B3D)
+![Build](https://img.shields.io/badge/build-1010-0E1B3D)
 
 <img src="docs/screens/device/02-dashboard.png" width="170" alt="Dashboard on a Galaxy S23 Ultra">
 <img src="docs/screens/device/04-calling-queue.png" width="170" alt="Calling queue">
@@ -49,7 +49,7 @@ Made for the Flutter Mobile App Developer machine test at C S Tech Infosolutions
 | **Screens** | 10 from the brief, plus Your progress, Reminders, Send logs, Cancel subscription, the start-up screen and the loading states |
 | **Stack** | Flutter 3.47 · Dart 3.13 · Riverpod 3 · go_router 18 · dio 5 · Lottie · bundled fonts. No code generation |
 | **Platform** | Android (min SDK 24). Release build installed and used on a Samsung Galaxy S23 Ultra, Android 17. The iOS project is generated but has not been built (no Mac) |
-| **Version** | `1.0.0 (build 1009)`, shown in the app's drawer and in Send logs, and tied to the git tag `build-1009` |
+| **Version** | `1.0.0 (build 1010)`, shown in the app's drawer and in Send logs, and tied to the git tag `build-1010` |
 | **API status** | The supplied mock API returns 404 on every endpoint, so the app falls back to clearly labelled **sample data**. See [why](#why-the-app-uses-demo-data) |
 | **Demo login** | `demo@getcalley.com` / `Demo@1234` (one tap on the login screen) |
 | **Demo video** | [`docs/demo/calley_demo.mp4`](docs/demo/calley_demo.mp4): 2 min 25 s, recorded on the phone, from the login screen |
@@ -274,7 +274,7 @@ flowchart TB
 | **State** | Riverpod 3. Choices the user made (language, theme, selected list, data source, session) live above every screen. Outcomes are keyed `listId/recordKey` and cleared on logout. Reminders and progress are *derived* by pure functions, never stored |
 | **API** | `CalleyApi` has the six endpoints. A screen never knows whether it is talking to the server or to sample data. Errors become an `ApiException` with a kind (network, timeout, server, not found, unauthorized, bad request) so each is worded correctly |
 | **Testability** | The clock, the launcher (dialer, share, mail, browser), the in-app video player and the data source are providers, so tests swap in stand-ins and record what was asked of the phone |
-| **Models** | `fromJson` only. Nothing is invented: a missing field shows "—" or is left out |
+| **Models** | `fromJson` only. Nothing is invented: a missing field shows "-" or is left out |
 
 **Stack**
 
@@ -373,6 +373,7 @@ flowchart LR
 | 1007 | Sign-in puts its button before the detour, the dashboard shows each figure once, outcomes have icons |
 | 1008 | The app opens on the Calley loading animation and has a bigger icon |
 | 1009 | The Undo message no longer stays on screen, and the tutorial shows its real length |
+| 1010 | Em dashes are gone from the app's text |
 
 Full detail per build is in [`MD/builds/`](MD/builds/) and the generated [`CHANGELOG.md`](CHANGELOG.md).
 

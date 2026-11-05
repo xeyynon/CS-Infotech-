@@ -1,10 +1,10 @@
-# video_requirements.md — the task video, step by step, against the app
+# video_requirements.md: the task video, step by step, against the app
 
 The task video (<https://www.youtube.com/watch?v=bP4U-L4EHcg>, 2:20, unlisted, silent) was downloaded and cut into one frame per second on 2026-11-05. It is a **click-through of the Figma prototype**: no real data, no API, just which tap leads to which screen. Those taps are the functional requirements.
 
 | Time | In the video | In the app | Met? |
 |---|---|---|---|
-| 0:00–0:07 | Figma canvas with the 9 frames | — | — |
+| 0:00–0:07 | Figma canvas with the 9 frames | - | - |
 | 0:08–0:24 | **Choose Your Language**: 9 languages, English selected, tap **Select** | Same screen and wording; Select → Register; choice remembered | ✅ |
 | 0:21–0:28 | **Register "Welcome!"**: Name, Email, Password, +91 / Mobile, Terms, "Already have an account? Sign In", **Sign Up** | Same fields, validated; Sign Up calls register + send-otp → OTP | ✅ |
 | 0:29–0:48 | **Whatsapp OTP Verification**: 6 boxes, `+91 7676286822?`, Resend OTP, **Verify** | Same; shows the number typed on Register with "Wrong details?"; Verify calls verify-otp → Login | ✅ |
