@@ -116,6 +116,29 @@ function writeReport(n, { title, summary, why, verified, next }) {
   return path;
 }
 
+// The build number lives in three places that must agree: the git tag
+// `build-N`, the `+N` in pubspec.yaml (Android versionCode / iOS build
+// number) and lib/core/build_info.dart (shown in the app). --pending writes
+// the last two so they cannot drift from the first.
+function stampBuild(n) {
+  const pub = join(ROOT, 'calley_app', 'pubspec.yaml');
+  if (existsSync(pub)) {
+    const t = readFileSync(pub, 'utf8');
+    writeFileSync(pub, t.replace(/^version:\s*([\d.]+)\+\d+/m, `version: $1+${n}`));
+  }
+  const dart = join(ROOT, 'calley_app', 'lib', 'core', 'build_info.dart');
+  writeFileSync(
+    dart,
+    `// Written by scripts/changelog.mjs --pending. Do not edit by hand.
+//
+// The project's build number. It is also the "+N" in pubspec.yaml (Android
+// versionCode, iOS build number) and the git tag \`build-N\`, so an installed
+// app, an APK file and a commit can always be matched.
+const int kBuildNumber = ${n};
+`,
+  );
+}
+
 function regenChangelog() {
   if (!existsSync(BUILDS_DIR)) return;
   const reports = readdirSync(BUILDS_DIR)
@@ -179,8 +202,9 @@ try {
     if (!title || !summary) throw new Error('--pending needs "<title>" "<summary>"');
     const n = nextBuild();
     const path = writeReport(n, { title, summary, why: opt(args, '--why'), verified: opt(args, '--verified'), next: opt(args, '--next') });
+    stampBuild(n);
     regenChangelog();
-    console.log(`wrote ${path} and CHANGELOG.md for build-${n}`);
+    console.log(`wrote ${path}, CHANGELOG.md, pubspec +${n} and build_info.dart for build-${n}`);
   } else if (args.includes('--tag')) {
     tagHead();
   } else if (args.includes('--regen')) {

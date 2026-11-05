@@ -43,12 +43,16 @@ When in doubt: would Surya mention it to the reviewer? Build. If not: InBul.
 git add <files of the change>                       # the report reads the staged diff
 node scripts/changelog.mjs --pending "<title>" "<what changed, one or two sentences>" \
     --why "<why>" --verified "<how it was checked, honestly>" --next "<next improvement>"
-git add MD/builds CHANGELOG.md
+git add MD/builds CHANGELOG.md calley_app/pubspec.yaml calley_app/lib/core/build_info.dart
 git commit -m "<same title>" -m "<body: what, why, verified>"
 node scripts/changelog.mjs --tag                    # pins build-N on HEAD; checks the title matches
 ```
 
 Title style: plain words, what the product now does. No prefixes, no number.
+
+### The build number is in the app
+
+`--pending` writes the build number into `calley_app/pubspec.yaml` (`version: 1.0.0+N`: Android versionCode, iOS build number) and `calley_app/lib/core/build_info.dart` (`kBuildNumber`). The drawer's Version row, the Settings footer and Send Logs show it, and a unit test fails if pubspec and `build_info.dart` disagree. So an APK file, an installed app and a git tag always match: `app-arm64-v8a-release.apk` with versionCode 1004 is `build-1004`.
 
 ## 5. Making an InBul
 
@@ -83,7 +87,7 @@ Never commit: keystores, `key.properties`, `.env`, anything from `.playwright-mc
 
 ```
 build:   git add <files> -> changelog.mjs --pending "title" "summary" --why .. --verified .. --next ..
-         -> git add MD/builds CHANGELOG.md -> git commit (same title) -> changelog.mjs --tag
+         -> git add MD/builds CHANGELOG.md calley_app/pubspec.yaml calley_app/lib/core/build_info.dart -> git commit (same title) -> changelog.mjs --tag
 inbul:   changelog.mjs --next-internal -> git add -> git commit "InBulNN: title" -> changelog.mjs --tag
 push:    git push origin main --tags        (only when Surya says so)
 never:   "(Build N)" in a title · hand-editing CHANGELOG.md · moving a tag · keys
@@ -91,9 +95,13 @@ never:   "(Build N)" in a title · hand-editing CHANGELOG.md · moving a tag · 
 
 ## 9. History
 
-The tags are the truth: `git tag -n`. First entries, 2026-11-04:
+The tags are the truth: `git tag -n`. Since the first two entries (2026-11-04):
 
 | Tag | Title |
 |---|---|
 | build-1000 | The Calley app: nine screens, the mock API client, and sample data when the server is down |
-| InBul01 | Project docs, research log, snapshots, and the build/InBul tooling |
+| build-1001 | Bug fixes and a calmer, centred layout with a faster calling loop |
+| build-1002 | Demo login, the official Calley logo, and a sign-in that accepts the server's own passwords |
+| build-1003 | Working Gamification, Reminders, Send Logs, Share App and Cancel Subscription (branch `feature/drawer-and-reminders`) |
+| build-1004 | The app now carries its build number: 1.0.0 (build 1004) |
+| InBul01–InBul07 | Docs and research, the bug register and fix log, the why-demo-data README and video check, the drawer-features plan and its tests, the build-number tooling |
