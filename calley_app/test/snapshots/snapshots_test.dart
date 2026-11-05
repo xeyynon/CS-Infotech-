@@ -2,7 +2,13 @@
 // checks that each one builds without throwing.
 //
 //   flutter test test/snapshots --update-goldens
+import 'dart:async';
+
+import 'package:calley_app/app/bootstrap.dart';
 import 'package:calley_app/core/network/api_client.dart';
+import 'package:calley_app/core/widgets/calley_loader.dart';
+import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:calley_app/core/providers.dart';
 import 'package:calley_app/core/network/calley_api.dart';
 import 'package:calley_app/models/models.dart';
@@ -366,6 +372,26 @@ void main() {
       );
       await settle(tester);
       await snap(tester, '12-sample-data-mode', dark: dark);
+    });
+  }
+
+  // 18: the first frame while the saved preferences are read.
+  for (final dark in [false, true]) {
+    testWidgets('18 start-up splash${dark ? ' (dark)' : ''}', (tester) async {
+      stillMotion(tester);
+      tester.platformDispatcher.platformBrightnessTestValue = dark
+          ? Brightness.dark
+          : Brightness.light;
+      addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+      tester.view.physicalSize = kPhoneLogical * kDpr;
+      tester.view.devicePixelRatio = kDpr;
+      addTearDown(tester.view.reset);
+      await tester.runAsync(() => AssetLottie(CalleyLoader.asset).load());
+      await tester.pumpWidget(
+        Bootstrap(load: () => Completer<SharedPreferences>().future),
+      );
+      await settle(tester);
+      await snap(tester, '18-startup-splash', dark: dark);
     });
   }
 }
