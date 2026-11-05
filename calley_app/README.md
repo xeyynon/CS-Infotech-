@@ -19,6 +19,34 @@ A Flutter build of the Calley mobile app's first ten screens, made for the C S T
 
 Every screen, light and dark, is in [`snapshots/`](snapshots/). They are rendered by `flutter test test/snapshots` at 390×844 @3x with the app's bundled fonts, so they are the real widget tree, not mock-ups.
 
+## Why the app uses demo data
+
+**The API supplied for this test is not reachable, so the app ships with a demo mode.** Everything else is built against the real API.
+
+- The test points to the Postman collection [Mock API V2](https://documenter.getpostman.com/view/38199901/2sB34Zpiy9), at `https://mock-api.calleyacd.com/api`. A copy is kept in [`MD/assets/postman-mock-api-v2.json`](../MD/assets/postman-mock-api-v2.json).
+- When checked on 2026-11-04 and again on 2026-11-05, **every documented endpoint returned HTTP 404** with an empty body: register, login, send-otp, verify-otp, list and list details.
+- The server's TLS certificate is issued to the hosting provider's name (`cool-meninsky.74-208-123-142.plesk.page`), not to `mock-api.calleyacd.com`, so browsers and Postman refuse the connection.
+- The root URL shows the hosting provider's default page. Together this suggests the domain is still parked on the hosting server but the API app is not deployed there.
+- You can check this yourself: <https://mock-api.calleyacd.com/api/list?userId=68626f9497757cb741f449b0>.
+
+**What the app does about it:**
+
+1. **It calls the real API first.** Requests, bodies and response parsing follow the Postman collection exactly, including login's `{"user": {...}}` wrapper and `GET /list` returning a single object. TLS is not switched off: the app trusts only that one server's certificate.
+2. **When a call fails, it says why.** For example: *"Not available on the Calley test server"*, with **Retry** and **Use sample data**. It never shows a fake success.
+3. **Sample data is the collection's own examples.** The "Test List" and its 50 contacts in `assets/mock/` are copied from the Postman example responses, so every list screen shows what the real API would return. The signed-in user is Swati, the person in the Figma screens.
+4. **A banner stays on every screen while sample data is on.** It cannot be mistaken for live data, and **Try server** switches back.
+5. **The demo login** below goes straight to sample mode, so the whole flow can be tested in one tap.
+
+**If the API comes back or moves:** nothing needs rebuilding for the same host. A new address is one build setting: `flutter run --dart-define=API_BASE_URL=https://new-host/api`. If the new server presents a different certificate, its SHA-256 fingerprint is added in `lib/core/network/api_client.dart`.
+
+## Demo login
+
+| Email | Password |
+|---|---|
+| `demo@getcalley.com` | `Demo@1234` |
+
+The login screen shows these, with a one-tap **Sign in with the demo account** button. Any other email goes to the real API.
+
 ## Run
 
 ```
@@ -46,13 +74,6 @@ Requires Flutter 3.35+ (built with 3.47 / Dart 3.13). Android `minSdk` is Flutte
 | Calling queue | — | Search and status filters, one tap opens the dialer, then a disposition sheet (kept for the session: the API has no write endpoint) |
 
 Pull to refresh on every data screen. Light and dark themes (Settings → Appearance).
-
-## When the server is down
-
-The mock host was checked on 2026-11-04: it presents a certificate for its hosting provider's name (`*.plesk.page`) and every `/api/*` path answers an empty 404. So:
-
-- TLS is **not** disabled. The connection is accepted only for that one host and only if the certificate's SHA-256 fingerprint matches the one on record (`lib/core/network/api_client.dart`). Any other certificate is rejected as usual. When the host renews its certificate the pin must be updated.
-- A failed request shows what happened, with **Retry** and **Use sample data**. Sample data is the JSON in `assets/mock/` (the same shapes as the API) and a banner stays on screen while it is active. Nothing returns a fake success.
 
 ## Architecture
 
