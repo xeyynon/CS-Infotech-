@@ -65,6 +65,10 @@ E:\Projects\CS\
 - Repo: https://github.com/xeyynon/CS-Infotech- — tags `build-1000`, `InBul01` (see [version_control.md](version_control.md)).
 - APK: `calley_app/build/app/outputs/flutter-apk/app-debug.apk` after `flutter build apk --debug` (not committed; attach to a Release).
 
+## 6b. The company (from the user, 2026-11-05)
+
+Product: https://www.getcalley.com/ · Company: https://www.csquaretech.com/ (C S Tech Infosolutions; web design/dev + SaaS: Calley, CloudSync, DripZen). Contact info@csquaretech.com, +91 99711 25588, WhatsApp +91 99711 25511. **Use the address in the HR email for the submission**; `info@cstech.in` was only a prior candidate's guess.
+
 ## 7. Open questions (as of 2026-11-04)
 
 - **The mock API is not serving.** Host up, cert for its Plesk name (pinned, DEC-010), every `/api/*` path → empty 404. The app offers labelled sample data when it fails. → [api_reference.md](api_reference.md), [pain.md](pain.md) P-01. **Ask HR for the current API.**

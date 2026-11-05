@@ -81,7 +81,7 @@ flutter test test/snapshots --update-goldens    # regenerate snapshots/ after a 
 
 ## Known limits
 
-- Counts in the sample `list_details.json` (27 + 23 + 11 = 61) do not match its 50 records; the app shows both as sent and says so under the ledger.
+- The server's counts overlap (the 11 rescheduled calls are also among the 23 called). The app shows disjoint groups that add up to the 50 records and says so under the ledger.
 - The Figma has "Star Calling Now"; the app says "Start Calling Now".
 - The 2-minute-challenge thumbnail and the "load number" illustration are drawn, not the Figma images (which could not be exported from a view-only file).
 - No iOS build was made (no Mac); the iOS project is generated and `url_launcher` schemes are not yet declared in `Info.plist`.

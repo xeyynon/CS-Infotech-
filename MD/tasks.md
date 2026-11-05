@@ -29,13 +29,13 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` dropped. Dates ar
 - [x] Error / empty / loading states on every network screen; no silent fallback (R-06)
 - [x] `flutter analyze` clean; `dart format`
 - [x] 32 snapshot tests (every screen × light/dark) double as "it renders" tests
-- [ ] Unit tests for models `fromJson` and validators (small; worth adding)
+- [x] Unit tests: models, validators, formatters, HTTP error mapping, real-router redirect (37 tests, 2026-11-05)
 - [ ] **Test on a physical Android device** — `tel:`, WhatsApp, YouTube launchers; the pinned-cert path; real keyboard on the OTP boxes
 
 ## 4. Submission
 
 - [x] README in `calley_app/` with screenshots, API notes, architecture, limits
-- [~] `flutter build apk --debug` (first build running 2026-11-04)
+- [x] APKs: debug 160 MB; release split per ABI 17–21 MB (2026-11-05)
 - [x] Git history per MD/version_control.md; pushed to github.com/xeyynon/CS-Infotech-
 - [ ] Attach the APK to a GitHub Release (v1.0.0 / build-1000)
 - [ ] Screen recording ≤ 3 min on a real device
@@ -44,7 +44,7 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` dropped. Dates ar
 ## 5. Nice-to-have (only after §4)
 
 - [ ] EN + HI translations (DEC-008)
-- [ ] iOS: `LSApplicationQueriesSchemes` in Info.plist; build on a Mac
+- [x] iOS: `LSApplicationQueriesSchemes` in Info.plist (2026-11-05); [ ] build on a Mac
 - [ ] Unit test for the certificate-pin predicate
 
 ## Design pass (2026-11-04, after "this looks AI generated")
@@ -54,3 +54,9 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` dropped. Dates ar
 - [x] Left-aligned auth screens; filled fields; tactile pill CTA; raised play button
 - [x] Contacts-style queue rows with name-seeded avatars
 - [x] Time-of-day greeting hero card
+
+## Bug cycle (2026-11-05)
+
+- [x] Audit: 12 finders + 3 fresh-eyes, 3 refuters per claim → 47 confirmed, 20 refuted (MD/bugs.md)
+- [x] All 47 fixed or resolved (MD/bugfixed.md); 69 tests green
+- [x] HCI pass: centred layouts, calling loop (Call next, outcomes, undo, progress), error states by cause

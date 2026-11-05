@@ -83,9 +83,8 @@ void main() {
         themeMode: mode,
         prefs: {'pref.language': 'en'},
       );
-      await tester.enterText(find.byType(TextField).at(0), '4');
-      await tester.enterText(find.byType(TextField).at(1), '8');
-      await tester.enterText(find.byType(TextField).at(2), '2');
+      // One real field behind the six boxes (B-03/B-16).
+      await tester.enterText(find.byType(TextField).first, '482');
       await settle(tester, frames: 2);
       await snap(tester, '03-otp', dark: dark);
     });
@@ -203,8 +202,6 @@ void main() {
         themeMode: mode,
         prefs: signedInPrefs(withList: true),
       );
-      await tester.tap(find.textContaining('Pending').first);
-      await settle(tester, frames: 2);
       await tester.tap(find.textContaining('Sherri').first);
       await settle(tester, frames: 3);
       await snap(tester, '10b-calling-queue-expanded', dark: dark);

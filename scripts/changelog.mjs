@@ -65,10 +65,18 @@ function writeReport(n, { title, summary, why, verified, next }) {
   mkdirSync(BUILDS_DIR, { recursive: true });
   const path = reportPath(n);
   const date = new Date().toISOString().slice(0, 10);
+  // B-47: a re-run with a new title or summary rebuilds the hand-written
+  // part; a re-run with the same title keeps any edits made to the report.
   let manual;
   if (existsSync(path)) {
     const old = readFileSync(path, 'utf8');
-    manual = /<!-- manual:start -->([\s\S]*?)<!-- manual:end -->/.exec(old)?.[1]?.trim();
+    const kept = /<!-- manual:start -->([\s\S]*?)<!-- manual:end -->/.exec(old)?.[1]?.trim();
+    const keptTitle = kept && /^# Build \d+: (.+)$/m.exec(kept)?.[1]?.trim();
+    if (kept && keptTitle === title) {
+      manual = kept;
+    } else if (kept) {
+      console.warn(`replacing the report for build-${n}: title was "${keptTitle}"`);
+    }
   }
   if (!manual) {
     manual = [
