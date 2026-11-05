@@ -7,7 +7,7 @@ Format: ID · date · decision · why · consequences. Append-only; supersede wi
 ## DEC-001 · 2026-11-04 · Keep research and planning in `MD/` as markdown
 **Decision:** All project knowledge lives in `E:\Projects\CS\MD\*.md`, indexed by `MD/README.md`.
 **Why:** Same layout as the previous project; works with any editor and with Claude Code recall.
-**Consequence:** Update `tasks.md` and `decisions.md` as work proceeds; `calley_MASTER.md` is the tie-breaker.
+**Consequence:** Update `decisions.md` as work proceeds; when documents disagree, the code is the tie-breaker.
 
 ## DEC-002 · 2026-11-04 · State management: **Riverpod** (proposed: confirm before coding)
 **Decision:** `flutter_riverpod` with `AsyncNotifier`s per feature.
@@ -76,7 +76,7 @@ Format: ID · date · decision · why · consequences. Append-only; supersede wi
 
 ## DEC-018 · 2026-11-05 · Drawer and bell features use only real, local data
 **Decision:** Progress, Reminders and Send Logs are computed from the list records and the outcomes logged on this phone. Send Logs shows its report before sending and never includes contact names, numbers or emails. Cancel Subscription and Change Password do not pretend to call an API that does not exist.
-**Why:** R-06 (no silent fakes). The test server stores nothing and has no cancel/password endpoint, so the honest versions explain that and point to Google Play or support. Plan: [plan_drawer_features.md](plan_drawer_features.md).
+**Why:** R-06 (no silent fakes). The test server stores nothing and has no cancel/password endpoint, so the honest versions explain that and point to Google Play or support.
 **Consequence:** Outcomes are per session (cleared on logout and on a data-source switch); the screens say so.
 
 ## DEC-008 · 2026-11-04 · i18n: ship real translations for EN + HI only (nice-to-have)

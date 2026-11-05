@@ -360,7 +360,7 @@ Text(title, style: context.display(34, weight: FontWeight.w800)),
 
 **Where:** `calley_app/lib/features/auth/otp_screen.dart:99` · **Category:** error-surfacing
 
-MD/flow.md says 'OTP wrong → inline error, keep digits.' On any badRequest the screen calls clear(), which wipes every box, so a one-digit typo means retyping the whole code.
+The flow notes said 'OTP wrong → inline error, keep digits.' On any badRequest the screen calls clear(), which wipes every box, so a one-digit typo means retyping the whole code.
 
 **Evidence**
 
@@ -374,7 +374,7 @@ if (e.kind == ApiErrorKind.badRequest) _otpKey.currentState?.clear();
 
 **Where:** `calley_app/lib/features/auth/otp_screen.dart:120` · **Category:** spec-divergence
 
-FR-3 and ui_screens 03 require the OTP screen to show '+91 <number>' under the boxes. The screen shows only the email. RegisterScreen validates a 10-digit mobile number, but stores only the email in pendingEmailProvider, so the number is never shown or used.
+The requirements and Figma screen 03 require the OTP screen to show '+91 <number>' under the boxes. The screen shows only the email. RegisterScreen validates a 10-digit mobile number, but stores only the email in pendingEmailProvider, so the number is never shown or used.
 
 **Evidence**
 
@@ -633,7 +633,7 @@ if (next?.phone != null) {
 
 **Where:** `calley_app/lib/features/dashboard/dashboard_screen.dart:140` · **Category:** copy-fidelity
 
-FR-5 and ui_screens 05/06 call for 'Hello Swati', with 'Welcome to Calley!' on the dashboard. The app shows a time-of-day greeting, and when there is no subscription the subline reads 'Welcome to Calley · ' with a dangling separator.
+The requirements and Figma screens 05/06 call for 'Hello Swati', with 'Welcome to Calley!' on the dashboard. The app shows a time-of-day greeting, and when there is no subscription the subline reads 'Welcome to Calley · ' with a dangling separator.
 
 **Evidence**
 
@@ -759,7 +759,7 @@ return Semantics(inMutuallyExclusiveGroup: true, checked: selected, label: '${la
 
 **Where:** `calley_app/lib/features/language/language_screen.dart:298` · **Category:** copy-fidelity
 
-FR-1 and ui_screens 01 call for the title 'Choose Your Language' and a 'Select' button. The app shows 'Choose your\nlanguage' and 'Continue', and no DEC entry covers the change.
+The requirements and Figma screen 01 call for the title 'Choose Your Language' and a 'Select' button. The app shows 'Choose your\nlanguage' and 'Continue', and no DEC entry covers the change.
 
 **Evidence**
 

@@ -307,8 +307,6 @@ Colours are tokens in a `ThemeExtension` with **the same names in light and dark
 - **HCI choices:** the primary button follows the fields it submits; each figure appears once; every change can be undone or is confirmed first; the queue's next action is the closest control.
 - **Accessibility:** 48 dp targets with gaps, real `Semantics` actions (not just labels), keyboard focus rings, live regions for errors, reduced-motion respected, text contrast of at least 4.5:1.
 
-The full design guide, written to be reused on other projects, is [`MD/frontendcalley.md`](MD/frontendcalley.md).
-
 ## Security and privacy
 
 - **TLS is never disabled.** The only certificate the app accepts beyond the system's trust store is the one test host's, pinned by SHA-256 fingerprint and scoped to that host.
@@ -357,7 +355,7 @@ flowchart LR
 - **Branches:** work happens on feature branches and is merged to `main` through pull requests.
 - **Commits** carry only the author's name; titles say what the product now does and never carry the build number.
 - **Release builds** use `flutter build apk --release --split-per-abi`; the Android version code is the build number plus the CPU offset.
-- **Method:** the loop that produced the UI is *build → render every screen to a PNG in both themes → look at it → name the class of mistake → write the rule down → search the project for the same mistake*. It is described in [`MD/frontendcalley.md`](MD/frontendcalley.md).
+- **Method:** the loop that produced the UI is *build → render every screen to a PNG in both themes → look at it → name the class of mistake → write the rule down → search the project for the same mistake*.
 
 ## Build history
 
@@ -406,13 +404,13 @@ calley_app/            the Flutter app
   test/                unit/ (logic and behaviour)  snapshots/ (harness and screenshot tests)
   snapshots/           light/ and dark/ PNGs of every screen state
 docs/                  demo/ (screen recording)  screens/device/ (phone screenshots)
-MD/                    research, requirements, decisions, bug register, design guide, version control, build reports
+MD/                    API reference, decisions, bug register, video check, version control, build reports
 scripts/changelog.mjs  build / InBul bookkeeping
 calley_loading_assets/ the supplied loading animation (originals)
 CHANGELOG.md           generated from the tags; not edited by hand
 ```
 
-Where to start in `MD/`: [`README.md`](MD/README.md) is the index. [`video_requirements.md`](MD/video_requirements.md) checks the task video step by step against the app, [`api_reference.md`](MD/api_reference.md) documents the endpoints, [`decisions.md`](MD/decisions.md) explains why, and [`tasks.md`](MD/tasks.md) shows what is done and what is left.
+Where to start in `MD/`: [`README.md`](MD/README.md) is the index. [`video_requirements.md`](MD/video_requirements.md) checks the task video step by step against the app, [`api_reference.md`](MD/api_reference.md) documents the endpoints, and [`decisions.md`](MD/decisions.md) explains why.
 
 ---
 

@@ -35,7 +35,7 @@ When in doubt: would Surya mention it to the reviewer? Build. If not: InBul.
 | `MD/builds/build-N.md` | One report per build: what, why, how checked, next; plus the staged file list | Hand-written part once; file list rebuilt by the script |
 | `CHANGELOG.md` | Build history, newest first | **Generated** by `scripts/changelog.mjs`. Never by hand |
 | `scripts/changelog.mjs` | The tool (Node ≥ 18, no dependencies) | Code |
-| `MD/decisions.md`, `MD/tasks.md`, `MD/tried_*.md` | Why, what's next, what worked | By hand |
+| `MD/decisions.md` | Why a choice was made | By hand |
 
 ## 4. Making a build
 
