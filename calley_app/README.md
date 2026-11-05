@@ -2,6 +2,8 @@
 
 A Flutter build of the Calley mobile app's first ten screens, made for the C S Tech Infosolutions Flutter machine test. Nine screens follow the Figma file; the tenth, the calling queue, is what "Start Calling Now" leads to.
 
+> **Start with the [project README](../README.md)** for the overview, workflows, screenshots, architecture and the demo video. This file is the developer reference for the app folder.
+
 <p>
   <img src="snapshots/light/01-language.png" width="160" alt="Language">
   <img src="snapshots/light/02-register.png" width="160" alt="Register">
@@ -56,7 +58,9 @@ flutter build apk --debug                     # build/app/outputs/flutter-apk/ap
 flutter run --dart-define=USE_MOCK=true       # force sample data (no server at all)
 ```
 
-Requires Flutter 3.35+ (built with 3.47 / Dart 3.13). Android `minSdk` is Flutter's default (21).
+Requires Flutter 3.35+ (built with 3.47 / Dart 3.13). Android `minSdk` is Flutter's default (24 with this Flutter).
+
+Release APKs, one per CPU type: `flutter build apk --release --split-per-abi` (arm64 is about 21 MB).
 
 ## What it does
 
@@ -101,7 +105,8 @@ test/         snapshot harness and tests
 
 ```
 flutter analyze                                 # 0 issues
-flutter test                                    # 32 snapshot tests: every screen builds, light and dark
+flutter test test/unit                          # 81 unit and behaviour tests
+flutter test test/snapshots                     # 52 snapshot tests: every screen, light and dark
 flutter test test/snapshots --update-goldens    # regenerate snapshots/ after a deliberate UI change
 ```
 
@@ -109,5 +114,5 @@ flutter test test/snapshots --update-goldens    # regenerate snapshots/ after a 
 
 - The server's counts overlap (the 11 rescheduled calls are also among the 23 called). The app shows disjoint groups that add up to the 50 records and says so under the ledger.
 - The Figma has "Star Calling Now"; the app says "Start Calling Now".
-- The 2-minute-challenge thumbnail and the "load number" illustration are drawn, not the Figma images (which could not be exported from a view-only file).
-- No iOS build was made (no Mac); the iOS project is generated and `url_launcher` schemes are not yet declared in `Info.plist`.
+- The tutorial card and the "load number" illustration are drawn, not the Figma images (which could not be exported from a view-only file). The card plays Calley's own setup video, which is 5 minutes long, and says so.
+- No iOS build was made (no Mac). The iOS project is set up (URL schemes in `Info.plist`, launch screen, icons) but has not been built or run.
