@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,6 +15,7 @@ import '../../core/widgets/primary_button.dart';
 import '../../core/widgets/status_views.dart';
 import '../../models/models.dart';
 import '../drawer/app_drawer.dart';
+import '../calls/disposition_sheet.dart';
 import '../lists/calling_lists_sheet.dart';
 
 /// Figma 06 (no list selected) and 08 (a list selected) on one screen.
@@ -48,20 +50,34 @@ class DashboardScreen extends ConsumerWidget {
           return;
         }
         final details = ref.read(listDetailsProvider(selected.id));
-        final next = details.hasValue
-            ? details.value!.calls
-                  .where((r) => r.status == CallStatus.pending)
-                  .firstOrNull
-            : null;
-        if (next?.phone != null) {
-          if (context.mounted) {
-            ref.read(launcherProvider).dial(context, next!.phone!);
-          }
-        } else if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No pending call to dial.')),
-          );
+        void say(String m) => ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(m)));
+        if (details.isLoading) {
+          return say('Still loading the list. Try again in a moment.');
         }
+        if (details.hasError) {
+          return say('Could not load the list, so there is nobody to dial.');
+        }
+        // B-34: the next contact still to call (pending AND not already
+        // logged this session), not always the first pending one.
+        final dispositions = ref.read(dispositionsProvider.notifier);
+        final next = details.value!.calls
+            .where(
+              (r) =>
+                  r.phone != null &&
+                  r.status == CallStatus.pending &&
+                  !r.isRescheduled &&
+                  dispositions.get(selected.id, r.key) == null,
+            )
+            .firstOrNull;
+        if (next == null) return say('Everyone in this list has been called.');
+        final placed = await ref
+            .read(launcherProvider)
+            .dial(context, next.phone!);
+        if (!placed || !context.mounted) return;
+        final result = await showDispositionSheet(context, next);
+        if (result != null) dispositions.set(selected.id, next.key, result);
     }
   }
 
@@ -126,20 +142,23 @@ class _EmptyDashboard extends ConsumerWidget {
     final c = context.c;
     final lists = ref.watch(listsProvider);
     final hasLists = lists.hasValue && lists.value!.isNotEmpty;
-    final now = ref.watch(clockProvider)();
-
     return Column(
       children: [
         Expanded(
           child: RefreshIndicator(
-            onRefresh: () => ref.refresh(listsProvider.future),
+            onRefresh: () async {
+              ref.invalidate(listsProvider);
+              try {
+                await ref.read(listsProvider.future);
+              } catch (_) {} // B-38: the error is shown on screen
+            },
             child: ListView(
               padding: const EdgeInsets.fromLTRB(Dims.page, 8, Dims.page, 8),
               children: [
                 GreetingCard(
-                  eyebrow: greetingFor(now),
+                  eyebrow: 'Hello',
                   name: user?.firstName ?? 'there',
-                  subline: 'Welcome to Calley · ${user?.subscription ?? ''}',
+                  subline: 'Welcome to Calley!',
                 ),
                 const SizedBox(height: Dims.gap),
                 if (lists.hasError && !lists.isLoading)
@@ -158,16 +177,26 @@ class _EmptyDashboard extends ConsumerWidget {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(20, 18, 20, 6),
                           child: Text.rich(
+                            textAlign: TextAlign.center,
                             TextSpan(
                               text: 'Visit ',
                               children: [
+                                // Styled as a link, so it works as one.
                                 TextSpan(
                                   text: 'app.getcalley.com',
-                                  style: context.body(
-                                    14.5,
-                                    weight: FontWeight.w600,
-                                    color: c.primary,
-                                  ),
+                                  style: context
+                                      .body(
+                                        14.5,
+                                        weight: FontWeight.w600,
+                                        color: c.primary,
+                                      )
+                                      .copyWith(
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () => ref
+                                        .read(launcherProvider)
+                                        .open(context, Links.webPanel),
                                 ),
                                 const TextSpan(
                                   text: ' to upload numbers that you wish to call using Calley Mobile App.',
@@ -186,8 +215,7 @@ class _EmptyDashboard extends ConsumerWidget {
                         else
                           Padding(
                             padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
+                            child: Center(
                               child: TextButton.icon(
                                 onPressed: () => ref.invalidate(listsProvider),
                                 icon: const Icon(
@@ -215,9 +243,14 @@ class _EmptyDashboard extends ConsumerWidget {
               ),
               const SizedBox(width: 12),
               Expanded(
+                // B-36: never send someone to the browser because the lists
+                // have not arrived yet or failed to load.
                 child: PrimaryButton(
-                  label: 'Start Calling Now',
-                  onPressed: hasLists
+                  label: lists.hasError ? 'Try again' : 'Start Calling Now',
+                  busy: lists.isLoading,
+                  onPressed: lists.hasError
+                      ? () => ref.invalidate(listsProvider)
+                      : hasLists
                       ? () => showCallingListsSheet(context)
                       : () => ref
                             .read(launcherProvider)
@@ -295,32 +328,37 @@ class _UploadIllustration extends StatelessWidget {
       ),
       child: Icon(icon, size: 18, color: color),
     );
+    // B-37: a fixed box, so the badges sit on the circle's edge.
     return ExcludeSemantics(
-      child: SizedBox(
-        height: 126,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              width: 108,
-              height: 108,
-              decoration: BoxDecoration(
-                color: c.cardAlt,
-                shape: BoxShape.circle,
+      child: Center(
+        child: SizedBox(
+          width: 150,
+          height: 126,
+          child: Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 108,
+                height: 108,
+                decoration: BoxDecoration(
+                  color: c.cardAlt,
+                  shape: BoxShape.circle,
+                ),
               ),
-            ),
-            Icon(Icons.phone_iphone_rounded, size: 60, color: c.primary),
-            Positioned(
-              top: 4,
-              right: 118,
-              child: badge(Icons.cloud_upload_outlined, c.scheduled),
-            ),
-            Positioned(
-              bottom: 4,
-              left: 118,
-              child: badge(Icons.headset_mic_outlined, c.pending),
-            ),
-          ],
+              Icon(Icons.phone_iphone_rounded, size: 60, color: c.primary),
+              Positioned(
+                top: 6,
+                right: 6,
+                child: badge(Icons.cloud_upload_outlined, c.scheduled),
+              ),
+              Positioned(
+                bottom: 6,
+                left: 6,
+                child: badge(Icons.headset_mic_outlined, c.pending),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -346,7 +384,12 @@ class _ActiveDashboard extends ConsumerWidget {
       children: [
         Expanded(
           child: RefreshIndicator(
-            onRefresh: () => ref.refresh(listDetailsProvider(list.id).future),
+            onRefresh: () async {
+              ref.invalidate(listDetailsProvider(list.id));
+              try {
+                await ref.read(listDetailsProvider(list.id).future);
+              } catch (_) {} // B-38
+            },
             child: ListView(
               padding: const EdgeInsets.fromLTRB(Dims.page, 8, Dims.page, 8),
               children: [
@@ -371,6 +414,7 @@ class _ActiveDashboard extends ConsumerWidget {
                         ),
                       ),
                       details.when(
+                        skipLoadingOnRefresh: false,
                         loading: () => const SkeletonBox(height: 34, width: 64),
                         error: (_, _) => Text(
                           noData,
@@ -387,7 +431,7 @@ class _ActiveDashboard extends ConsumerWidget {
                                 color: c.primary,
                               ),
                             ),
-                            Text('calls', style: context.eyebrow()),
+                            Text('contacts', style: context.eyebrow()),
                           ],
                         ),
                       ),
@@ -398,6 +442,7 @@ class _ActiveDashboard extends ConsumerWidget {
                 ),
                 const SizedBox(height: Dims.gap),
                 details.when(
+                  skipLoadingOnRefresh: false, // B-30: Retry shows progress
                   loading: () => const _StatsSkeleton(),
                   error: (e, _) => ErrorView(
                     error: e,
@@ -418,7 +463,7 @@ class _ActiveDashboard extends ConsumerWidget {
             label: 'Start Calling Now',
             icon: Icons.play_arrow_rounded,
             onPressed: details.hasValue
-                ? () => context.push(Routes.queue)
+                ? () => context.push(Routes.queue, extra: CallStatus.pending)
                 : null,
           ),
         ),
@@ -436,72 +481,87 @@ class _Stats extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.c;
+    // Three groups that do not overlap, so the ring adds up to the list
+    // (the server's own counts count rescheduled calls twice).
     final segments = [
-      DonutSegment(label: 'Done', value: details.called, color: c.done),
-      DonutSegment(label: 'Pending', value: details.pending, color: c.pending),
+      DonutSegment(label: 'Done', value: details.doneCount, color: c.done),
+      DonutSegment(
+        label: 'Pending',
+        value: details.pendingCount,
+        color: c.pending,
+      ),
       DonutSegment(
         label: 'Scheduled',
-        value: details.rescheduled,
+        value: details.scheduledCount,
         color: c.scheduled,
       ),
     ];
     final total = details.total;
     return Column(
       children: [
+        // Centred: the ring is the one focal point of this screen, with its
+        // legend directly underneath so the eye does not travel sideways.
         AppCard(
-          padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-          child: Row(
-            children: [
-              total == 0
-                  ? const SizedBox(
-                      width: 150,
-                      child: EmptyView(
-                        icon: Icons.donut_large_rounded,
-                        title: 'No calls yet',
-                      ),
-                    )
-                  : DonutChart(
-                      segments: segments,
-                      size: 150,
-                      centerLabel: 'TOTAL',
-                    ),
-              const SizedBox(width: 18),
-              Expanded(
+          padding: const EdgeInsets.fromLTRB(18, 22, 18, 18),
+          child: LayoutBuilder(
+            builder: (context, box) {
+              final size = (box.maxWidth * 0.55).clamp(140.0, 190.0);
+              return SizedBox(
+                width: double.infinity, // fill the card; centre within it
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Progress', style: context.eyebrow()),
-                    const SizedBox(height: 10),
-                    for (final s in segments) ...[
-                      Row(
-                        children: [
-                          Container(
-                            width: 9,
-                            height: 9,
-                            decoration: BoxDecoration(
-                              color: s.color,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              s.label,
-                              style: context.body(13.5, color: c.textSecondary),
-                            ),
-                          ),
-                          Text(
-                            fmtShare(s.value, total),
-                            style: context.mono(13.5),
-                          ),
-                        ],
+                    if (total == 0)
+                      const EmptyView(
+                        icon: Icons.donut_large_rounded,
+                        title: 'No calls in this list yet',
+                        body: 'Upload numbers on the web panel, then Refresh.',
+                      )
+                    else
+                      DonutChart(
+                        segments: segments,
+                        size: size,
+                        centerLabel: 'CONTACTS',
                       ),
-                      const SizedBox(height: 8),
-                    ],
+                    const SizedBox(height: 18),
+                    // B-40: wraps instead of cutting words at large text sizes.
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 18,
+                      runSpacing: 8,
+                      children: [
+                        for (final s in segments)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 9,
+                                height: 9,
+                                decoration: BoxDecoration(
+                                  color: s.color,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 7),
+                              Text(
+                                s.label,
+                                style: context.body(
+                                  13.5,
+                                  color: c.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                fmtShare(s.value, total),
+                                style: context.mono(13.5),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
                   ],
                 ),
-              ),
-            ],
+              );
+            },
           ),
         ),
         const SizedBox(height: Dims.gap),
@@ -509,28 +569,31 @@ class _Stats extends StatelessWidget {
           entries: [
             LedgerEntry(
               label: 'Pending',
-              value: details.pending,
+              value: details.pendingCount,
               color: c.pending,
               onTap: () => onStatTap(CallStatus.pending),
             ),
+            // B-39: Done is the same blue everywhere it appears.
             LedgerEntry(
               label: 'Done',
-              value: details.called,
-              color: c.success,
+              value: details.doneCount,
+              color: c.done,
               onTap: () => onStatTap(CallStatus.called),
             ),
             LedgerEntry(
               label: 'Scheduled',
-              value: details.rescheduled,
+              value: details.scheduledCount,
               color: c.scheduled,
               onTap: () => onStatTap(CallStatus.rescheduled),
             ),
           ],
         ),
-        if (details.calls.length != total) ...[
+        if (details.scheduledCount > 0 && details.calls.isNotEmpty) ...[
           const SizedBox(height: 10),
           Text(
-            'Counts as reported by the server; the list holds ${details.calls.length} records.',
+            'Scheduled calls were made and moved to a later time; the server '
+            'also counts them as called (${details.called} called in all).',
+            textAlign: TextAlign.center,
             style: context.body(12, color: c.textMuted),
           ),
         ],
@@ -546,12 +609,12 @@ class _StatsSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        AppCard(
-          child: Row(
-            children: const [
-              SkeletonBox(height: 150, width: 150, radius: 75),
-              SizedBox(width: 18),
-              Expanded(child: SkeletonBox(height: 90)),
+        const AppCard(
+          child: Column(
+            children: [
+              SkeletonBox(height: 170, width: 170, radius: 85),
+              SizedBox(height: 18),
+              SkeletonBox(height: 14, width: 220),
             ],
           ),
         ),

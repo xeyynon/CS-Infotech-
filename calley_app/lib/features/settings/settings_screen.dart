@@ -199,22 +199,30 @@ class SettingsScreen extends ConsumerWidget {
                         ),
                       ),
                       const Divider(indent: 16, endIndent: 16),
-                      row(
-                        icon: Icons.cloud_outlined,
-                        title: 'Data source',
-                        value: source == DataSource.remote
-                            ? 'Calley test server'
-                            : 'Sample data on this device',
-                        trailing: kForceMock
+                      // B-46: one control, one label; tapping the row toggles.
+                      SwitchListTile(
+                        secondary: const Icon(Icons.cloud_outlined, size: 22),
+                        title: const Text(
+                          'Use sample data',
+                          style: TextStyle(
+                            fontSize: 14.5,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        subtitle: Text(
+                          source == DataSource.remote
+                              ? 'Off: using the Calley test server'
+                              : 'On: data bundled with the app',
+                          style: TextStyle(fontSize: 12.5, color: c.textMuted),
+                        ),
+                        value: source == DataSource.sample,
+                        onChanged: kForceMock
                             ? null
-                            : Switch(
-                                value: source == DataSource.sample,
-                                onChanged: (v) => ref
-                                    .read(dataSourceProvider.notifier)
-                                    .set(
-                                      v ? DataSource.sample : DataSource.remote,
-                                    ),
-                              ),
+                            : (v) => ref
+                                  .read(dataSourceProvider.notifier)
+                                  .set(
+                                    v ? DataSource.sample : DataSource.remote,
+                                  ),
                       ),
                     ],
                   ),

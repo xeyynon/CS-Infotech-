@@ -63,8 +63,10 @@ class _SkeletonBoxState extends State<SkeletonBox>
   }
 }
 
-/// Something the server could not give us. Says what happened, offers Retry,
-/// and (only when talking to the real server) offers labelled sample data.
+/// Something the server could not give us. Says what happened in words that
+/// match the cause, offers Retry, and (only when talking to the real server)
+/// offers labelled sample data. Announced to screen readers when it appears
+/// (B-06).
 class ErrorView extends ConsumerWidget {
   const ErrorView({
     super.key,
@@ -84,83 +86,132 @@ class ErrorView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.c;
     final remote = ref.watch(dataSourceProvider) == DataSource.remote;
-    final msg = messageOf(error);
-    final isServerDown =
-        error is ApiException &&
-        (error as ApiException).kind != ApiErrorKind.badRequest &&
-        (error as ApiException).kind != ApiErrorKind.unauthorized;
-    return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: c.danger.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.cloud_off_rounded, color: c.danger, size: 19),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isServerDown
-                          ? 'The Calley server did not answer'
-                          : 'Request refused',
-                      style: context.display(17, weight: FontWeight.w700),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      msg,
-                      style: context.body(13.5, color: c.textSecondary),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          if (!compact) ...[
-            const SizedBox(height: 14),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
+    final kind = error is ApiException ? (error as ApiException).kind : null;
+    // A form problem (wrong password, bad code) is the user's to fix: no
+    // cloud icon, no "server" title, no sample-data offer.
+    final isInputProblem =
+        kind == ApiErrorKind.badRequest || kind == ApiErrorKind.unauthorized;
+    final (String? title, IconData icon) = switch (kind) {
+      ApiErrorKind.notFound => (
+        'Not available on the Calley test server',
+        Icons.cloud_off_rounded,
+      ),
+      ApiErrorKind.network => (
+        'Could not reach the Calley server',
+        Icons.wifi_off_rounded,
+      ),
+      ApiErrorKind.timeout => (
+        'The Calley server is too slow to answer',
+        Icons.hourglass_bottom_rounded,
+      ),
+      ApiErrorKind.badRequest ||
+      ApiErrorKind.unauthorized => (null, Icons.error_outline_rounded),
+      _ => ('The Calley server returned an error', Icons.cloud_off_rounded),
+    };
+    final offerSample = remote && !isInputProblem;
+    // When the server has nothing at that address, retrying will not help:
+    // the useful next step is the sample data, so it gets the filled button.
+    final samplePrimary = offerSample && kind == ApiErrorKind.notFound;
+
+    final retry = onRetry == null
+        ? null
+        : (samplePrimary
+              ? OutlinedButton.icon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: const Text('Retry'),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, Dims.tap),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                )
+              : FilledButton.icon(
+                  onPressed: onRetry,
+                  icon: const Icon(Icons.refresh_rounded, size: 18),
+                  label: const Text('Retry'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, Dims.tap),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                ));
+    final sample = !offerSample
+        ? null
+        : FilledButton.icon(
+            onPressed: () =>
+                ref.read(dataSourceProvider.notifier).set(DataSource.sample),
+            icon: const Icon(Icons.dataset_outlined, size: 18),
+            label: const Text('Use sample data'),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(0, Dims.tap),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              backgroundColor: samplePrimary ? c.primary : c.cardAlt,
+              foregroundColor: samplePrimary ? c.onPrimary : c.text,
+            ),
+          );
+
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      child: AppCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (onRetry != null)
-                  OutlinedButton.icon(
-                    onPressed: onRetry,
-                    icon: const Icon(Icons.refresh_rounded, size: 18),
-                    label: const Text('Retry'),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(0, 44),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                    ),
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: c.danger.withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
                   ),
-                if (remote && isServerDown)
-                  FilledButton.tonalIcon(
-                    onPressed: () => ref
-                        .read(dataSourceProvider.notifier)
-                        .set(DataSource.sample),
-                    icon: const Icon(Icons.dataset_outlined, size: 18),
-                    label: const Text('Use sample data'),
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size(0, 44),
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      backgroundColor: c.cardAlt,
-                      foregroundColor: c.text,
-                    ),
+                  child: Icon(icon, color: c.danger, size: 19),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (title != null) ...[
+                        Text(
+                          title,
+                          style: context.display(17, weight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 4),
+                      ] else
+                        const SizedBox(height: 8),
+                      Text(
+                        messageOf(error),
+                        style: context.body(
+                          title == null ? 14.5 : 13.5,
+                          color: title == null ? c.text : c.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
+                ),
               ],
             ),
+            if (!compact && (retry != null || sample != null)) ...[
+              const SizedBox(height: 14),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  if (samplePrimary) ...[
+                    sample!,
+                    ?retry,
+                  ] else ...[
+                    ?retry,
+                    ?sample,
+                  ],
+                ],
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -254,7 +305,7 @@ class SampleDataBanner extends ConsumerWidget {
                     .read(dataSourceProvider.notifier)
                     .set(DataSource.remote),
                 style: TextButton.styleFrom(
-                  minimumSize: const Size(0, 36),
+                  minimumSize: const Size(0, Dims.tap),
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   foregroundColor: c.text,
                 ),

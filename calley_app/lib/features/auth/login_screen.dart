@@ -23,7 +23,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _form = GlobalKey<FormState>();
   late final _email = TextEditingController(
-    text: ref.read(pendingEmailProvider) ?? '',
+    text: ref.read(pendingSignupProvider)?.email ?? '',
   );
   final _password = TextEditingController();
   bool _busy = false;
@@ -37,18 +37,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _submit() async {
+    if (_busy) return; // B-25
     if (!_form.currentState!.validate()) return;
     setState(() {
       _busy = true;
       _error = null;
     });
+    // B-22: capture before awaiting, so a successful sign-in still lands if
+    // the screen is gone by the time the server answers.
+    final api = ref.read(apiProvider);
+    final session = ref.read(sessionProvider.notifier);
+    final pending = ref.read(pendingSignupProvider.notifier);
     try {
-      final user = await ref
-          .read(apiProvider)
-          .login(email: _email.text.trim(), password: _password.text);
-      await ref.read(sessionProvider.notifier).signIn(user);
+      final user = await api.login(
+        email: _email.text.trim(),
+        password: _password.text,
+      );
+      pending.set(null); // B-14
+      await session.signIn(user);
       // The router redirects to Getting Started once the session exists.
     } on ApiException catch (e) {
+      if (!mounted) return;
       setState(() => _error = e);
       if (e.kind == ApiErrorKind.unauthorized ||
           e.kind == ApiErrorKind.badRequest) {
@@ -118,20 +127,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 autofillHints: const [AutofillHints.password],
                 onSubmitted: (_) => _submit(),
               ),
+              // Spaced away from the show-password toggle so the two
+              // targets do not touch (Fitts: adjacent targets need a gap).
+              const SizedBox(height: 8),
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: _forgotPassword,
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    minimumSize: const Size(0, Dims.tap),
+                    foregroundColor: context.c.textSecondary,
                   ),
-                  child: Text(
-                    'Forgot Password?',
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      color: context.c.textSecondary,
-                    ),
-                  ),
+                  child: const Text('Forgot Password?'),
                 ),
               ),
             ],

@@ -25,6 +25,7 @@ class PrimaryButton extends StatefulWidget {
 
 class _PrimaryButtonState extends State<PrimaryButton> {
   bool _down = false;
+  bool _focused = false;
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +36,26 @@ class _PrimaryButtonState extends State<PrimaryButton> {
     final bg = enabled ? c.primary : c.skeleton;
     final fg = enabled ? c.onPrimary : c.textMuted;
 
+    // B-05: the semantics node carries the tap (TalkBack double-tap, Switch
+    // Access, Voice Access) and the button is focusable, so Tab reaches it
+    // and Enter/Space press it, with a visible focus ring.
     return Semantics(
       button: true,
       enabled: enabled,
       label: widget.busy ? '${widget.label}, please wait' : widget.label,
-      child: ExcludeSemantics(
+      onTap: enabled ? widget.onPressed : null,
+      excludeSemantics: true,
+      child: FocusableActionDetector(
+        enabled: enabled,
+        onShowFocusHighlight: (v) => setState(() => _focused = v),
+        actions: {
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              widget.onPressed?.call();
+              return null;
+            },
+          ),
+        },
         child: GestureDetector(
           onTapDown: enabled ? (_) => setState(() => _down = true) : null,
           onTapUp: enabled ? (_) => setState(() => _down = false) : null,
@@ -53,6 +69,7 @@ class _PrimaryButtonState extends State<PrimaryButton> {
               decoration: BoxDecoration(
                 color: bg,
                 borderRadius: BorderRadius.circular(999),
+                border: _focused ? Border.all(color: c.text, width: 2.5) : null,
                 boxShadow: [
                   if (enabled)
                     BoxShadow(color: c.primaryDeep, offset: Offset(0, lift)),

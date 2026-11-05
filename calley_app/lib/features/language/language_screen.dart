@@ -49,15 +49,20 @@ class _LanguageScreenState extends ConsumerState<LanguageScreen> {
                 Dims.page,
                 14,
               ),
+              // Centred heading block, as in Figma 01; the list below stays
+              // left-aligned for scanning.
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (!changing) ...[
-                    const CalleyLogo(size: 36),
+                    const CalleyLogo(size: 40),
                     const SizedBox(height: 28),
-                    Text(
-                      'Choose your\nlanguage',
-                      style: context.display(32, weight: FontWeight.w800),
+                    Semantics(
+                      header: true,
+                      child: Text(
+                        'Choose Your Language', // B-43: Figma wording
+                        textAlign: TextAlign.center,
+                        style: context.display(30, weight: FontWeight.w800),
+                      ),
                     ),
                     const SizedBox(height: 8),
                   ],
@@ -65,6 +70,7 @@ class _LanguageScreenState extends ConsumerState<LanguageScreen> {
                     changing
                         ? 'Pick the language the app should use.'
                         : 'You can change this later in Settings.',
+                    textAlign: TextAlign.center,
                     style: context.body(14, color: c.textSecondary),
                   ),
                 ],
@@ -98,7 +104,7 @@ class _LanguageScreenState extends ConsumerState<LanguageScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(Dims.page, 12, Dims.page, 16),
               child: PrimaryButton(
-                label: changing ? 'Save' : 'Continue',
+                label: changing ? 'Save' : 'Select', // B-43
                 onPressed: _select,
               ),
             ),
@@ -123,10 +129,13 @@ class _LanguageRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.c;
+    // B-42: one node per row, read once, with its own tap.
     return Semantics(
       inMutuallyExclusiveGroup: true,
       checked: selected,
       label: '${language.name}, ${language.greeting}',
+      excludeSemantics: true,
+      onTap: onTap,
       child: InkWell(
         onTap: onTap,
         child: Padding(

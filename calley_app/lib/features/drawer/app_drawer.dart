@@ -27,8 +27,13 @@ class AppDrawer extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Log out?'),
-        content: const Text(
-          'You will need to sign in again to see your calling lists.',
+        content: Text(
+          ref.read(dispositionsProvider).isEmpty
+              ? 'You will need to sign in again to see your calling lists.'
+              : 'You will need to sign in again. The '
+                    '${ref.read(dispositionsProvider).length} call outcome'
+                    '${ref.read(dispositionsProvider).length == 1 ? '' : 's'} '
+                    'logged on this phone will be cleared.',
         ),
         actions: [
           TextButton(
@@ -131,7 +136,13 @@ class AppDrawer extends ConsumerWidget {
               final sel = ref.read(selectedListProvider);
               if (sel != null) ref.invalidate(listDetailsProvider(sel.id));
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Refreshing from the server…')),
+                SnackBar(
+                  content: Text(
+                    ref.read(dataSourceProvider) == DataSource.sample
+                        ? 'Reloading sample data…' // B-41
+                        : 'Refreshing from the server…',
+                  ),
+                ),
               );
             }),
             item(
@@ -192,7 +203,7 @@ class AppDrawer extends ConsumerWidget {
             ),
             item(Icons.share_outlined, 'Share App', () {
               Navigator.pop(context);
-              ref.read(launcherProvider).open(context, Links.playStore);
+              ref.read(launcherProvider).open(context, Links.download);
             }),
             item(Icons.logout_rounded, 'Logout', () => _logout(context, ref)),
             const SizedBox(height: 12),
