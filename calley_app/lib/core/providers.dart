@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../features/reminders/reminders.dart';
 import '../models/models.dart';
 import 'network/api_client.dart';
 import 'network/calley_api.dart';
@@ -200,9 +201,35 @@ class DispositionsNotifier extends Notifier<Map<String, String>> {
   /// How many records of [listId] have an outcome logged.
   int countFor(String listId) =>
       state.keys.where((k) => k.startsWith('$listId/')).length;
+
+  /// Outcome label → how many records of [listId] were logged with it.
+  Map<String, int> outcomeCounts(String listId) {
+    final out = <String, int>{};
+    state.forEach((k, v) {
+      if (k.startsWith('$listId/')) out[v] = (out[v] ?? 0) + 1;
+    });
+    return out;
+  }
 }
 
 final dispositionsProvider =
     NotifierProvider<DispositionsNotifier, Map<String, String>>(
       DispositionsNotifier.new,
     );
+
+/// Scheduled calls for the selected list that still need making, grouped and
+/// ordered. Drives the Reminders screen and the bell's badge.
+final remindersProvider = Provider<List<Reminder>>((ref) {
+  final selected = ref.watch(selectedListProvider);
+  if (selected == null) return const [];
+  final details = ref.watch(listDetailsProvider(selected.id));
+  final logged = ref.watch(dispositionsProvider);
+  final now = ref.watch(clockProvider)();
+  if (!details.hasValue) return const [];
+  return buildReminders(
+    details.value!.calls,
+    now,
+    isHandled: (r) =>
+        logged.containsKey(DispositionsNotifier.keyFor(selected.id, r.key)),
+  );
+});

@@ -21,9 +21,7 @@ class CalleyLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
-    final asset = !showText
-        ? _mark
-        : (dark ? _logoDark : _logo);
+    final asset = !showText ? _mark : (dark ? _logoDark : _logo);
     return Semantics(
       label: 'Calley, automatic call dialer',
       image: true,

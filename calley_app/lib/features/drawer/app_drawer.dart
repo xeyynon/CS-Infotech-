@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -7,6 +8,7 @@ import '../../app/theme.dart';
 import '../../core/providers.dart';
 import '../../core/utils/launchers.dart';
 import '../../core/widgets/cards.dart';
+import '../support/support_sheets.dart';
 
 /// Shown in the drawer's App Info and the Settings footer.
 const String kAppVersion = '1.0.0';
@@ -15,11 +17,26 @@ const String kAppVersion = '1.0.0';
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
 
-  void _soon(BuildContext context, String what) {
-    Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$what is not part of this test build.')),
-    );
+  Future<void> _share(BuildContext context, WidgetRef ref) async {
+    const text =
+        'Calley turns your phone into an auto dialer for sales calls. '
+        '${Links.download}';
+    final messenger = ScaffoldMessenger.of(context);
+    final shared = await ref
+        .read(launcherProvider)
+        .share(text, subject: 'Calley: automatic call dialer');
+    if (shared) return;
+    // No share sheet on this device: copy the message instead.
+    await Clipboard.setData(const ClipboardData(text: text));
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Sharing is not available here. The message was copied.',
+          ),
+        ),
+      );
   }
 
   Future<void> _logout(BuildContext context, WidgetRef ref) async {
@@ -145,16 +162,14 @@ class AppDrawer extends ConsumerWidget {
                 ),
               );
             }),
-            item(
-              Icons.emoji_events_outlined,
-              'Gamification',
-              () => _soon(context, 'Gamification'),
-            ),
-            item(
-              Icons.description_outlined,
-              'Send Logs',
-              () => _soon(context, 'Send Logs'),
-            ),
+            item(Icons.emoji_events_outlined, 'Gamification', () {
+              Navigator.pop(context);
+              context.push(Routes.progress);
+            }),
+            item(Icons.description_outlined, 'Send Logs', () {
+              Navigator.pop(context);
+              showSendLogsSheet(context);
+            }),
             item(Icons.settings_outlined, 'Settings', () {
               Navigator.pop(context);
               context.push(Routes.settings);
@@ -163,11 +178,10 @@ class AppDrawer extends ConsumerWidget {
               Navigator.pop(context);
               ref.read(launcherProvider).open(context, Links.whatsapp);
             }),
-            item(
-              Icons.person_off_outlined,
-              'Cancel Subscription',
-              () => _soon(context, 'Cancel Subscription'),
-            ),
+            item(Icons.person_off_outlined, 'Cancel Subscription', () {
+              Navigator.pop(context);
+              showCancelSubscriptionSheet(context);
+            }),
             const Divider(height: 20, indent: 18, endIndent: 18),
             Padding(
               padding: const EdgeInsets.fromLTRB(18, 0, 18, 6),
@@ -203,7 +217,7 @@ class AppDrawer extends ConsumerWidget {
             ),
             item(Icons.share_outlined, 'Share App', () {
               Navigator.pop(context);
-              ref.read(launcherProvider).open(context, Links.download);
+              _share(context, ref);
             }),
             item(Icons.logout_rounded, 'Logout', () => _logout(context, ref)),
             const SizedBox(height: 12),
