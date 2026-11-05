@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
 import '../../app/theme.dart';
+import '../../core/build_info.dart';
 import '../../core/providers.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/cards.dart';
@@ -232,7 +233,7 @@ class SettingsScreen extends ConsumerWidget {
                 const SizedBox(height: 20),
                 Center(
                   child: Text(
-                    'Calley $kAppVersion',
+                    'Calley $kAppVersion · build $kBuildNumber',
                     style: TextStyle(fontSize: 12, color: c.textMuted),
                   ),
                 ),

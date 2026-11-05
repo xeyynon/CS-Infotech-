@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
 import '../../app/theme.dart';
+import '../../core/build_info.dart';
 import '../../core/providers.dart';
 import '../../core/utils/launchers.dart';
 import '../../core/widgets/cards.dart';
@@ -12,6 +13,9 @@ import '../support/support_sheets.dart';
 
 /// Shown in the drawer's App Info and the Settings footer.
 const String kAppVersion = '1.0.0';
+
+/// Version plus the project build number, e.g. `1.0.0 (build 1004)`.
+const String kAppVersionLabel = '$kAppVersion (build $kBuildNumber)';
 
 /// Figma 09 — the side navigation.
 class AppDrawer extends ConsumerWidget {
@@ -209,7 +213,7 @@ class AppDrawer extends ConsumerWidget {
                 style: TextStyle(fontSize: 14.5, fontWeight: FontWeight.w500),
               ),
               trailing: Text(
-                kAppVersion,
+                '$kAppVersion · build $kBuildNumber',
                 style: TextStyle(color: c.textMuted, fontSize: 13),
               ),
               minTileHeight: Dims.tap,
