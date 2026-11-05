@@ -62,6 +62,18 @@ Format: ID · date · decision · why · consequences. Append-only; supersede wi
 **Decision:** Tags are the truth (`build-N`, `InBulNN`); `scripts/changelog.mjs` writes `MD/builds/build-N.md` and `CHANGELOG.md`; push only when asked, with `--tags`. See MD/version_control.md.
 **Why:** Same scheme as the user's other projects; keeps the public build list short and the internal work recorded.
 
+## DEC-015 · 2026-11-05 · Switching data source keeps the session (B-13)
+**Decision:** Turning sample data on or off does not sign the user out; it clears this session's logged outcomes, and lists/details refetch from the new source.
+**Why:** "Use sample data" is offered in the middle of a task when the server fails; signing the person out there would punish the recovery path. Outcomes are cleared because they belong to the other data set.
+
+## DEC-016 · 2026-11-05 · Links point at the real Calley pages
+**Decision:** Terms, Privacy, About, Download from getcalley.com; Help/WhatsApp uses +91 99711 25511 as published on csquaretech.com. The company is C S Tech Infosolutions (csquaretech.com, info@csquaretech.com).
+**Why:** The user supplied both sites on 2026-11-05. Placeholder links look unfinished to a reviewer from the company itself.
+
+## DEC-017 · 2026-11-05 · Counts are shown as disjoint groups
+**Decision:** Ring and ledger show Pending / Done / Scheduled computed from the records so they add up to the list (27 + 12 + 11 = 50). The server's own "called 23" includes the 11 rescheduled; a footnote says so.
+**Why:** Two different totals on one screen (50 contacts vs 61) was the most confusing thing on the dashboard (audit UX #27/#32/#38).
+
 ## DEC-008 · 2026-11-04 · i18n: ship real translations for EN + HI only (nice-to-have)
 **Decision:** `flutter_localizations` + ARB for English and Hindi; other 7 languages fall back to English.
 **Why:** Demonstrates the language screen does something; full 9-language translation is wasted effort for a test. **Defer until core flow is done.**
