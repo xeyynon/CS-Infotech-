@@ -55,6 +55,14 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[-]` dropped. Dates ar
 - [x] Contacts-style queue rows with name-seeded avatars
 - [x] Time-of-day greeting hero card
 
+## Branch feature/drawer-and-reminders (2026-11-05)
+
+- [x] Plan (MD/plan_drawer_features.md, InBul05)
+- [x] F1 Your progress · F2 Reminders + bell badge · F3 Send Logs · F4 Share App · F5 Cancel Subscription
+- [x] 107 tests green (45 unit/behavior, 44 snapshots incl. 18 new)
+- [ ] Merge to main when approved; rebuild the APKs
+- [ ] Later branches: real language switching (DEC-008), the Figma-conflicting UX items, auto-dial mode
+
 ## Bug cycle (2026-11-05)
 
 - [x] Audit: 12 finders + 3 fresh-eyes, 3 refuters per claim → 47 confirmed, 20 refuted (MD/bugs.md)

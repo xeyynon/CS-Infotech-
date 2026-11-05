@@ -71,6 +71,11 @@ Requires Flutter 3.35+ (built with 3.47 / Dart 3.13). Android `minSdk` is Flutte
 | Calling lists | 07 | Bottom sheet and Settings section with Refresh; selection persisted |
 | Dashboard, active list | 08 | `GET /list/{id}`: ring chart, Pending/Done/Scheduled ledger, counts as the server sends them |
 | Drawer | 09 | All items; Logout clears the session and returns to Login |
+| Gamification → **Your progress** | 09 | Level from the share of the list reached, a bar to the next level, outcomes logged by type, five badges. Counted from the list and this phone's outcomes |
+| Bell → **Reminders** | 06/08 | Scheduled calls grouped Overdue / Today / Upcoming, with a count badge on the bell. One tap dials, then asks for the outcome; a logged call leaves the list |
+| Send Logs | 09 | Shows the exact report (version, platform, data source, list counts, outcome totals, **no names or numbers**), then Email to support or Copy |
+| Share App | 09 | System share sheet with the download link; copies the message if the phone has no share sheet |
+| Cancel Subscription | 09 | Says plans are billed outside the app; Keep my plan (first), Manage on Google Play, Contact support |
 | Calling queue | — | Search and status filters, one tap opens the dialer, then a disposition sheet (kept for the session: the API has no write endpoint) |
 
 Pull to refresh on every data screen. Light and dark themes (Settings → Appearance).

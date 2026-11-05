@@ -37,8 +37,8 @@ Not built, on purpose: Change Password and Forgot Password (the API has no endpo
 
 ## Done means
 
-- [ ] Each of F1–F5 reachable from the screen named above and working with the demo account.
-- [ ] `flutter analyze` 0 issues; `flutter test` green, with new unit tests for the three pure modules.
-- [ ] Snapshots reviewed in both themes, no overflow at 390×844.
-- [ ] No contact name or phone number leaves the phone through Send Logs.
-- [ ] Documented in the README feature table and `MD/tasks.md`.
+- [x] Each of F1–F5 reachable from the screen named above and working with the demo account.
+- [x] `flutter analyze` 0 issues; `flutter test` 107 passed, with unit tests for the three pure modules and behavior tests for share, mail and reminders.
+- [x] Snapshots reviewed in both themes, no overflow at 390×844.
+- [x] No contact name or phone number leaves the phone through Send Logs.
+- [x] Documented in the README feature table and `MD/tasks.md`.
