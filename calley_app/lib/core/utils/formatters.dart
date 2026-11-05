@@ -1,6 +1,6 @@
 /// Text helpers. Each returns a string and never invents a value:
 /// something missing is an em dash.
-const String noData = '—';
+const String noData = '-';
 
 String fmtPhone(String? raw) {
   if (raw == null || raw.isEmpty) return noData;

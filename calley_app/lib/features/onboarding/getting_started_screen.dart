@@ -10,7 +10,7 @@ import '../../core/widgets/cards.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../core/widgets/tutorial_video.dart';
 
-/// Figma 05 — the first screen after sign-in: who you are, where to upload
+/// Figma 05: the first screen after sign-in: who you are, where to upload
 /// numbers, the 2-minute tutorial, and "Start Calling Now".
 class GettingStartedScreen extends ConsumerWidget {
   const GettingStartedScreen({super.key});

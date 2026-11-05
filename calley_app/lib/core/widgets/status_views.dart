@@ -217,7 +217,7 @@ class ErrorView extends ConsumerWidget {
   }
 }
 
-/// "Ran and found nothing" — neutral, not an error.
+/// "Ran and found nothing": neutral, not an error.
 class EmptyView extends StatelessWidget {
   const EmptyView({
     super.key,
@@ -295,7 +295,7 @@ class SampleDataBanner extends ConsumerWidget {
               child: Text(
                 kForceMock
                     ? 'Sample data (USE_MOCK build)'
-                    : 'Sample data — the Calley server could not be reached',
+                    : 'Sample data: the Calley server could not be reached',
                 style: context.body(12.5, weight: FontWeight.w600),
               ),
             ),

@@ -46,7 +46,7 @@ abstract final class Validators {
 }
 
 /// B-24: keeps the national 10 digits of an Indian mobile number however it
-/// arrives — typed, pasted or autofilled as "+91 98711 25588" or
+/// arrives: typed, pasted or autofilled as "+91 98711 25588" or
 /// "098711 25588". Drops a leading 91 or 0 only when there are too many
 /// digits for a national number, then caps at 10.
 class IndianMobileFormatter extends TextInputFormatter {

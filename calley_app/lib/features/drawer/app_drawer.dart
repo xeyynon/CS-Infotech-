@@ -17,7 +17,7 @@ const String kAppVersion = '1.0.0';
 /// Version plus the project build number, e.g. `1.0.0 (build 1004)`.
 const String kAppVersionLabel = '$kAppVersion (build $kBuildNumber)';
 
-/// Figma 09 — the side navigation.
+/// Figma 09: the side navigation.
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
 
@@ -134,7 +134,7 @@ class AppDrawer extends ConsumerWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          user?.email ?? '—',
+                          user?.email ?? '-',
                           style: TextStyle(
                             color: c.onPrimary.withValues(alpha: 0.85),
                             fontSize: 12,

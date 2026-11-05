@@ -13,7 +13,7 @@ import '../drawer/app_drawer.dart';
 import '../language/languages.dart';
 import '../lists/calling_lists_sheet.dart';
 
-/// Figma 07 — profile header, PROFILE SETTINGS, CALLING LISTS. Plus two
+/// Figma 07: profile header, PROFILE SETTINGS, CALLING LISTS. Plus two
 /// rows the design does not have: theme and data source.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});

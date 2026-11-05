@@ -13,7 +13,7 @@ import '../../core/widgets/primary_button.dart';
 import '../../core/widgets/status_views.dart';
 import 'auth_scaffold.dart';
 
-/// Figma 02 — "Welcome! Please register to continue".
+/// Figma 02: "Welcome! Please register to continue".
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 

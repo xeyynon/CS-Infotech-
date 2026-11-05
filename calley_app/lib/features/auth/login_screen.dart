@@ -13,7 +13,7 @@ import '../../core/widgets/primary_button.dart';
 import '../../core/widgets/status_views.dart';
 import 'auth_scaffold.dart';
 
-/// Figma 04 — "Welcome. Please sign-in to continue".
+/// Figma 04: "Welcome. Please sign-in to continue".
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
