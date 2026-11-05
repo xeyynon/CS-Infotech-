@@ -5,12 +5,11 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme.dart';
 import '../../core/providers.dart';
 import '../../core/utils/formatters.dart';
-import '../../core/utils/launchers.dart';
 import '../../core/widgets/cards.dart';
 import '../../core/widgets/primary_button.dart';
 import '../../core/widgets/status_views.dart';
 import '../../models/models.dart';
-import 'disposition_sheet.dart';
+import 'call_actions.dart';
 
 /// Status filter for the queue. "Open" = still to call in this session:
 /// pending on the server and no outcome logged here yet.
@@ -115,35 +114,6 @@ class _CallingQueueScreenState extends ConsumerState<CallingQueueScreen> {
         (qDigits.isNotEmpty && phoneDigits.contains(qDigits));
   }
 
-  Future<void> _logOutcome(String listId, CallRecord r) async {
-    final notifier = ref.read(dispositionsProvider.notifier);
-    final previous = notifier.get(listId, r.key);
-    final result = await showDispositionSheet(context, r, current: previous);
-    if (result == null || !mounted) return;
-    notifier.set(listId, r.key, result);
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text('${r.displayName}: $result'),
-          action: SnackBarAction(
-            label: 'Undo',
-            onPressed: () => previous == null
-                ? notifier.remove(listId, r.key)
-                : notifier.set(listId, r.key, previous),
-          ),
-        ),
-      );
-  }
-
-  Future<void> _call(String listId, CallRecord r) async {
-    if (r.phone == null) return;
-    // B-27: only ask how the call went if the dialer actually opened.
-    final placed = await ref.read(launcherProvider).dial(context, r.phone!);
-    if (!placed || !mounted) return;
-    await _logOutcome(listId, r);
-  }
-
   void _clearSearch() {
     _search.clear();
     setState(() => _query = '');
@@ -201,7 +171,7 @@ class _CallingQueueScreenState extends ConsumerState<CallingQueueScreen> {
                 child: PrimaryButton(
                   label: 'Call next · ${next.firstName}',
                   icon: Icons.call_rounded,
-                  onPressed: () => _call(listId, next),
+                  onPressed: () => callAndLog(context, ref, listId, next),
                 ),
               ),
             ),
@@ -344,8 +314,18 @@ class _CallingQueueScreenState extends ConsumerState<CallingQueueScreen> {
                                         ? null
                                         : items[i].key,
                                   ),
-                                  onCall: () => _call(listId, items[i]),
-                                  onLog: () => _logOutcome(listId, items[i]),
+                                  onCall: () => callAndLog(
+                                    context,
+                                    ref,
+                                    listId,
+                                    items[i],
+                                  ),
+                                  onLog: () => logOutcome(
+                                    context,
+                                    ref,
+                                    listId,
+                                    items[i],
+                                  ),
                                 ),
                               ],
                             ],
