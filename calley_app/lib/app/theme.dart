@@ -343,6 +343,9 @@ ThemeData buildTheme(Brightness brightness) {
       behavior: SnackBarBehavior.floating,
       backgroundColor: c.navy,
       contentTextStyle: text.bodyMedium?.copyWith(color: c.onNavy),
+      // The action (Undo) is as bright as the message: the default tint is
+      // faint on the navy bar.
+      actionTextColor: c.onNavy,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
     ),
     dividerTheme: DividerThemeData(color: c.border, space: 1, thickness: 1),

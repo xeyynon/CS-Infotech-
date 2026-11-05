@@ -1,7 +1,7 @@
 name: calley_app
 description: "Calley - Automatic Call Dialer. Flutter machine test for C S Tech Infosolutions."
 publish_to: 'none'
-version: 1.0.0+1008
+version: 1.0.0+1009
 
 environment:
   sdk: ^3.13.5

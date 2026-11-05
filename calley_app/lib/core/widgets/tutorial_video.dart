@@ -128,7 +128,7 @@ class _Poster extends StatelessWidget {
           color: c.cardAlt,
           child: Column(
             children: [
-              Text('TUTORIAL · 2:00', style: context.eyebrow()),
+              Text('TUTORIAL · 5:13', style: context.eyebrow()),
               const SizedBox(height: 10),
               Text(
                 '2 Minute Challenge',

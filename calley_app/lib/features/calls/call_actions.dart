@@ -27,6 +27,11 @@ Future<void> logOutcome(
     ..showSnackBar(
       SnackBar(
         content: Text('${r.displayName}: $result'),
+        // With an action Flutter keeps a snackbar up until it is dismissed,
+        // so it followed the agent to other screens (seen on a real phone).
+        // Give Undo a fair window, then let it go.
+        persist: false,
+        duration: const Duration(seconds: 6),
         action: SnackBarAction(
           label: 'Undo',
           onPressed: () => previous == null
