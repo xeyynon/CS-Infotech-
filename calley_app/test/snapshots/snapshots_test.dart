@@ -321,6 +321,30 @@ void main() {
       await snap(tester, '16-cancel-subscription', dark: dark);
     });
 
+    testWidgets('17 dashboard waiting for the list$suffix', (tester) async {
+      stillMotion(tester);
+      await pumpApp(
+        tester,
+        location: '/dashboard',
+        themeMode: mode,
+        prefs: signedInPrefs(withList: true),
+        api: const HangingApi(),
+      );
+      await snap(tester, '17-dashboard-loading', dark: dark);
+    });
+
+    testWidgets('17b queue waiting for the list$suffix', (tester) async {
+      stillMotion(tester);
+      await pumpApp(
+        tester,
+        location: '/queue',
+        themeMode: mode,
+        prefs: signedInPrefs(withList: true),
+        api: const HangingApi(),
+      );
+      await snap(tester, '17b-queue-loading', dark: dark);
+    });
+
     testWidgets('12 sample data banner$suffix', (tester) async {
       await pumpApp(
         tester,
