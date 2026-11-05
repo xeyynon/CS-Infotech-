@@ -36,7 +36,7 @@ class _SendLogsSheet extends ConsumerWidget {
         ? const <String, int>{}
         : ref.read(dispositionsProvider.notifier).outcomeCounts(selected.id);
     return buildLogReport(
-      appVersion: kAppVersion,
+      appVersion: kAppVersionLabel,
       platform: defaultTargetPlatform.name,
       now: ref.read(clockProvider)(),
       dataSource: ref.read(dataSourceProvider) == DataSource.sample
