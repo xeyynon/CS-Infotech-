@@ -15,7 +15,8 @@ import '../../core/widgets/primary_button.dart';
 import '../../core/widgets/status_views.dart';
 import '../../models/models.dart';
 import '../drawer/app_drawer.dart';
-import '../calls/disposition_sheet.dart';
+import '../calls/call_actions.dart';
+import '../reminders/reminders.dart';
 import '../lists/calling_lists_sheet.dart';
 
 /// Figma 06 (no list selected) and 08 (a list selected) on one screen.
@@ -72,12 +73,8 @@ class DashboardScreen extends ConsumerWidget {
             )
             .firstOrNull;
         if (next == null) return say('Everyone in this list has been called.');
-        final placed = await ref
-            .read(launcherProvider)
-            .dial(context, next.phone!);
-        if (!placed || !context.mounted) return;
-        final result = await showDispositionSheet(context, next);
-        if (result != null) dispositions.set(selected.id, next.key, result);
+        if (!context.mounted) return;
+        await callAndLog(context, ref, selected.id, next);
     }
   }
 
@@ -100,12 +97,20 @@ class DashboardScreen extends ConsumerWidget {
               }
             },
           ),
-          IconButton(
-            tooltip: 'Notifications',
-            icon: const Icon(Icons.notifications_none_rounded),
-            onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('No notifications yet.')),
-            ),
+          // Calls due today or late, as a count on the bell.
+          Builder(
+            builder: (context) {
+              final due = dueCount(ref.watch(remindersProvider));
+              return IconButton(
+                tooltip: due == 0 ? 'Reminders' : 'Reminders, $due due',
+                icon: Badge(
+                  isLabelVisible: due > 0,
+                  label: Text('$due'),
+                  child: const Icon(Icons.notifications_none_rounded),
+                ),
+                onPressed: () => context.push(Routes.reminders),
+              );
+            },
           ),
           const SizedBox(width: 4),
         ],

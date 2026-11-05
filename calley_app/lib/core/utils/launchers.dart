@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Links the design points at. Kept in one place.
@@ -21,16 +22,53 @@ abstract final class Links {
   static const support = 'https://www.getcalley.com/contact-us/';
   static const download =
       'https://www.getcalley.com/download-sales-call-auto-dialer/';
+
+  /// Where a Google Play subscription is managed (and cancelled).
+  static const playSubscriptions =
+      'https://play.google.com/store/account/subscriptions';
+  static const supportEmail = 'support@getcalley.com';
 }
 
 typedef LaunchFn = Future<bool> Function(Uri uri, {LaunchMode mode});
+typedef ShareFn = Future<void> Function(String text, String subject);
+
+Future<void> _platformShare(String text, String subject) async {
+  await SharePlus.instance.share(ShareParams(text: text, subject: subject));
+}
 
 /// Opens things outside the app. Behind a provider so tests can swap the
 /// platform call for a stub.
 class Launcher {
-  const Launcher([this._launch = launchUrl]);
+  const Launcher([this._launch = launchUrl, this._share = _platformShare]);
 
   final LaunchFn _launch;
+  final ShareFn _share;
+
+  /// Opens the system share sheet. Returns false if the platform could not
+  /// show one (the caller can fall back to copying).
+  Future<bool> share(String text, {String subject = 'Calley'}) async {
+    try {
+      await _share(text, subject);
+      return true;
+    } on Exception {
+      return false;
+    } on Error {
+      return false;
+    }
+  }
+
+  /// Opens the mail app addressed to [to] with a subject and body filled in.
+  Future<bool> email(String to, {String subject = '', String body = ''}) {
+    final uri = Uri(
+      scheme: 'mailto',
+      path: to,
+      query: [
+        if (subject.isNotEmpty) 'subject=${Uri.encodeComponent(subject)}',
+        if (body.isNotEmpty) 'body=${Uri.encodeComponent(body)}',
+      ].join('&'),
+    );
+    return _safe(uri, LaunchMode.externalApplication);
+  }
 
   /// Opens a URL in the matching external app. Tells the user when nothing
   /// can open it instead of failing silently.

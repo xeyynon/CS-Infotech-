@@ -74,6 +74,11 @@ Format: ID · date · decision · why · consequences. Append-only; supersede wi
 **Decision:** Ring and ledger show Pending / Done / Scheduled computed from the records so they add up to the list (27 + 12 + 11 = 50). The server's own "called 23" includes the 11 rescheduled; a footnote says so.
 **Why:** Two different totals on one screen (50 contacts vs 61) was the most confusing thing on the dashboard (audit UX #27/#32/#38).
 
+## DEC-018 · 2026-11-05 · Drawer and bell features use only real, local data
+**Decision:** Progress, Reminders and Send Logs are computed from the list records and the outcomes logged on this phone. Send Logs shows its report before sending and never includes contact names, numbers or emails. Cancel Subscription and Change Password do not pretend to call an API that does not exist.
+**Why:** R-06 (no silent fakes). The test server stores nothing and has no cancel/password endpoint, so the honest versions explain that and point to Google Play or support. Plan: [plan_drawer_features.md](plan_drawer_features.md).
+**Consequence:** Outcomes are per session (cleared on logout and on a data-source switch); the screens say so.
+
 ## DEC-008 · 2026-11-04 · i18n: ship real translations for EN + HI only (nice-to-have)
 **Decision:** `flutter_localizations` + ARB for English and Hindi; other 7 languages fall back to English.
 **Why:** Demonstrates the language screen does something; full 9-language translation is wasted effort for a test. **Defer until core flow is done.**

@@ -10,6 +10,8 @@ import '../features/calls/calling_queue_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/language/language_screen.dart';
 import '../features/onboarding/getting_started_screen.dart';
+import '../features/progress/progress_screen.dart';
+import '../features/reminders/reminders_screen.dart';
 import '../features/settings/settings_screen.dart';
 
 abstract final class Routes {
@@ -21,6 +23,8 @@ abstract final class Routes {
   static const dashboard = '/dashboard';
   static const queue = '/queue';
   static const settings = '/settings';
+  static const progress = '/progress';
+  static const reminders = '/reminders';
 
   static const authGroup = {language, register, otp, login};
 
@@ -84,4 +88,6 @@ List<RouteBase> appRoutes() => [
   GoRoute(path: Routes.dashboard, builder: (_, _) => const DashboardScreen()),
   GoRoute(path: Routes.queue, builder: (_, _) => const CallingQueueScreen()),
   GoRoute(path: Routes.settings, builder: (_, _) => const SettingsScreen()),
+  GoRoute(path: Routes.progress, builder: (_, _) => const ProgressScreen()),
+  GoRoute(path: Routes.reminders, builder: (_, _) => const RemindersScreen()),
 ];

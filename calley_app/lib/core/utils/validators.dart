@@ -25,6 +25,11 @@ abstract final class Validators {
     return v!.length < 6 ? 'Use at least 6 characters' : null;
   }
 
+  /// Sign-in only checks that a password was typed: the server's own
+  /// example account uses "123" (Postman collection), so a length rule
+  /// here would block real accounts. The 6-character rule is for sign-up.
+  static String? loginPassword(String? v) => required(v, 'Password');
+
   static String? mobile(String? v) {
     final r = required(v, 'Mobile number');
     if (r != null) return r;
