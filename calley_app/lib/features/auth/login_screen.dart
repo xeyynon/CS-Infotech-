@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/router.dart';
 import '../../app/theme.dart';
+import '../../core/demo_account.dart';
 import '../../core/network/api_client.dart';
 import '../../core/providers.dart';
 import '../../core/utils/validators.dart';
@@ -45,14 +46,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
     // B-22: capture before awaiting, so a successful sign-in still lands if
     // the screen is gone by the time the server answers.
-    final api = ref.read(apiProvider);
     final session = ref.read(sessionProvider.notifier);
     final pending = ref.read(pendingSignupProvider.notifier);
+    final email = _email.text.trim();
+    // The demo account never touches the server: it signs in against the
+    // bundled sample data, and the sample banner stays visible.
+    if (DemoAccount.isDemoEmail(email)) {
+      if (_password.text != DemoAccount.password) {
+        setState(() {
+          _busy = false;
+          _error = const ApiException(
+            'Wrong password for the demo account. It is ${DemoAccount.password}.',
+            kind: ApiErrorKind.unauthorized,
+          );
+        });
+        return;
+      }
+      await ref.read(dataSourceProvider.notifier).set(DataSource.sample);
+    }
+    final api = ref.read(apiProvider);
     try {
-      final user = await api.login(
-        email: _email.text.trim(),
-        password: _password.text,
-      );
+      final user = await api.login(email: email, password: _password.text);
       pending.set(null); // B-14
       await session.signIn(user);
       // The router redirects to Getting Started once the session exists.
@@ -123,7 +137,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               PasswordField(
                 controller: _password,
                 textInputAction: TextInputAction.done,
-                validator: Validators.password,
+                validator: Validators.loginPassword,
                 autofillHints: const [AutofillHints.password],
                 onSubmitted: (_) => _submit(),
               ),
@@ -157,7 +171,64 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ),
         const SizedBox(height: 6),
         PrimaryButton(label: 'Sign In', busy: _busy, onPressed: _submit),
+        const SizedBox(height: 20),
+        _DemoCard(onUse: _useDemo),
       ],
+    );
+  }
+
+  void _useDemo() {
+    _email.text = DemoAccount.email;
+    _password.text = DemoAccount.password;
+    _submit();
+  }
+}
+
+/// Shows the demo credentials in plain sight (recognition over recall) and
+/// signs in with them in one tap.
+class _DemoCard extends StatelessWidget {
+  const _DemoCard({required this.onUse});
+
+  final VoidCallback onUse;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.c;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 10),
+      decoration: BoxDecoration(
+        color: c.cardAlt,
+        borderRadius: BorderRadius.circular(Dims.cardRadius),
+      ),
+      child: Column(
+        children: [
+          Text('TRY THE DEMO', style: context.eyebrow()),
+          const SizedBox(height: 10),
+          SelectableText(
+            DemoAccount.email,
+            textAlign: TextAlign.center,
+            style: context.mono(14, weight: FontWeight.w600),
+          ),
+          const SizedBox(height: 2),
+          SelectableText(
+            DemoAccount.password,
+            textAlign: TextAlign.center,
+            style: context.mono(14, weight: FontWeight.w600),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Uses sample data bundled with the app.',
+            textAlign: TextAlign.center,
+            style: context.body(12.5, color: c.textSecondary),
+          ),
+          TextButton.icon(
+            onPressed: onUse,
+            style: TextButton.styleFrom(minimumSize: const Size(0, Dims.tap)),
+            icon: const Icon(Icons.login_rounded, size: 18),
+            label: const Text('Sign in with the demo account'),
+          ),
+        ],
+      ),
     );
   }
 }
