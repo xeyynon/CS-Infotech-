@@ -3,6 +3,7 @@
 // Why here and not on a device: the machine has no emulator. Flutter's test
 // renderer draws the exact same widget tree with Skia, so these PNGs are a
 // faithful record of the UI; only platform text shaping differs.
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:calley_app/app/router.dart';
@@ -10,11 +11,13 @@ import 'package:calley_app/app/theme.dart';
 import 'package:calley_app/core/network/calley_api.dart';
 import 'package:calley_app/core/providers.dart';
 import 'package:calley_app/core/storage/session_store.dart';
+import 'package:calley_app/models/models.dart';
 import 'package:calley_app/core/utils/launchers.dart';
 import 'package:url_launcher/url_launcher.dart' show LaunchMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,6 +32,42 @@ const CalleyApi sampleApi = SampleCalleyApi(
   latency: Duration.zero,
   loadText: loadMockFromDisk,
 );
+
+/// A launcher whose every platform call succeeds. Pass [onLaunch] / [onShare]
+/// to see what the app tried to open or share.
+Launcher okLauncher({
+  void Function(Uri uri)? onLaunch,
+  void Function(String text, String subject)? onShare,
+}) => Launcher((uri, {mode = LaunchMode.platformDefault}) async {
+  onLaunch?.call(uri);
+  return true;
+}, (text, subject) async => onShare?.call(text, subject));
+
+/// Outcomes already "logged on this phone" for the sample list, so snapshots
+/// can show a list part-way through. Records are the first pending contacts.
+class SeededDispositions extends DispositionsNotifier {
+  SeededDispositions(this.seed);
+
+  final Map<String, String> seed;
+
+  @override
+  Map<String, String> build() => seed;
+}
+
+/// `listId/recordKey` → outcome for the first [outcomes.length] pending
+/// contacts of the bundled sample, in order.
+Map<String, String> seedOutcomes(List<String> outcomes) {
+  final text = File('assets/mock/list_details.json').readAsStringSync();
+  final d = ListDetails.fromJson(jsonDecode(text) as Map<String, dynamic>);
+  final pending = d.calls
+      .where((r) => r.status == CallStatus.pending && !r.isRescheduled)
+      .toList();
+  return {
+    for (var i = 0; i < outcomes.length; i++)
+      DispositionsNotifier.keyFor('68626fb697757cb741f449b9', pending[i].key):
+          outcomes[i],
+  };
+}
 
 /// Phone surface: 390×844 logical at 3x (an iPhone 14 / Pixel-class panel).
 const Size kPhoneLogical = Size(390, 844);
@@ -96,6 +135,8 @@ Future<GoRouter> pumpApp(
   Map<String, Object> prefs = const {},
   CalleyApi api = sampleApi,
   ThemeMode themeMode = ThemeMode.light,
+  Launcher? launcher,
+  List<Override> overrides = const [],
 }) async {
   tester.view.physicalSize = kPhoneLogical * kDpr;
   tester.view.devicePixelRatio = kDpr;
@@ -114,9 +155,8 @@ Future<GoRouter> pumpApp(
         // A fixed morning, so the greeting in the snapshots never changes.
         clockProvider.overrideWithValue(() => DateTime(2026, 11, 4, 10, 30)),
         // No platform in a widget test: pretend every launch succeeded.
-        launcherProvider.overrideWithValue(
-          Launcher((uri, {mode = LaunchMode.platformDefault}) async => true),
-        ),
+        launcherProvider.overrideWithValue(launcher ?? okLauncher()),
+        ...overrides,
       ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,

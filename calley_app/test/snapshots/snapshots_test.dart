@@ -3,6 +3,7 @@
 //
 //   flutter test test/snapshots --update-goldens
 import 'package:calley_app/core/network/api_client.dart';
+import 'package:calley_app/core/providers.dart';
 import 'package:calley_app/core/network/calley_api.dart';
 import 'package:calley_app/models/models.dart';
 import 'package:flutter/material.dart';
@@ -228,6 +229,96 @@ void main() {
         api: const _DeadApi(),
       );
       await snap(tester, '11-server-unreachable', dark: dark);
+    });
+
+    testWidgets('13 progress, nothing logged yet$suffix', (tester) async {
+      await pumpApp(
+        tester,
+        location: '/progress',
+        themeMode: mode,
+        prefs: signedInPrefs(withList: true),
+      );
+      await snap(tester, '13-progress', dark: dark);
+    });
+
+    testWidgets('13b progress, part-way through$suffix', (tester) async {
+      await pumpApp(
+        tester,
+        location: '/progress',
+        themeMode: mode,
+        prefs: signedInPrefs(withList: true),
+        overrides: [
+          dispositionsProvider.overrideWith(
+            () => SeededDispositions(
+              seedOutcomes([
+                'Very positive',
+                'Satisfied',
+                'Satisfied',
+                'Neutral',
+                'Neutral',
+                'Negative',
+                'Needs follow-up',
+              ]),
+            ),
+          ),
+        ],
+      );
+      await snap(tester, '13b-progress-active', dark: dark);
+    });
+
+    testWidgets('14 reminders$suffix', (tester) async {
+      await pumpApp(
+        tester,
+        location: '/reminders',
+        themeMode: mode,
+        prefs: signedInPrefs(withList: true),
+      );
+      await snap(tester, '14-reminders', dark: dark);
+    });
+
+    testWidgets('14b reminders, nothing scheduled$suffix', (tester) async {
+      await pumpApp(
+        tester,
+        location: '/reminders',
+        themeMode: mode,
+        prefs: signedInPrefs(), // no list chosen
+      );
+      await snap(tester, '14b-reminders-no-list', dark: dark);
+    });
+
+    testWidgets('15 send logs sheet$suffix', (tester) async {
+      await pumpApp(
+        tester,
+        location: '/dashboard',
+        themeMode: mode,
+        prefs: signedInPrefs(withList: true),
+        overrides: [
+          dispositionsProvider.overrideWith(
+            () => SeededDispositions(
+              seedOutcomes(['Satisfied', 'Neutral', 'Neutral']),
+            ),
+          ),
+        ],
+      );
+      await tester.tap(find.byTooltip('Open navigation menu'));
+      await settle(tester, frames: 4);
+      await tester.tap(find.text('Send Logs'));
+      await settle(tester, frames: 4);
+      await snap(tester, '15-send-logs', dark: dark);
+    });
+
+    testWidgets('16 cancel subscription sheet$suffix', (tester) async {
+      await pumpApp(
+        tester,
+        location: '/dashboard',
+        themeMode: mode,
+        prefs: signedInPrefs(withList: true),
+      );
+      await tester.tap(find.byTooltip('Open navigation menu'));
+      await settle(tester, frames: 4);
+      await tester.tap(find.text('Cancel Subscription'));
+      await settle(tester, frames: 4);
+      await snap(tester, '16-cancel-subscription', dark: dark);
     });
 
     testWidgets('12 sample data banner$suffix', (tester) async {

@@ -16,7 +16,7 @@ The task video (<https://www.youtube.com/watch?v=bP4U-L4EHcg>, 2:20, unlisted, s
 | 1:51–2:08 | **Drawer**: Swati · Personal, Getting Started, Sync Data, Gamification, Send Logs, Settings, Help?, Cancel Subscription, App Info (About Us, Privacy Policy, Version 1.01.52, Share App), Logout | Every item present; working ones open real pages; Logout asks first | ✅ |
 | 2:09–2:19 | Back through Dashboard → Login → Register → Language | Back navigation works; the session is remembered across restarts | ✅ |
 
-**Every step of the video is in the app.** Beyond it, the app adds what a working dialer needs and the prototype could not show: the real API calls, error states, the calling queue (search, filters, dial, log outcome, undo, progress), sample data while the server is down, the demo login, and light/dark themes.
+**Every step of the video is in the app.** On branch `feature/drawer-and-reminders` the drawer's Gamification, Send Logs, Cancel Subscription and Share App, and the bell, are working features rather than stubs (see [plan_drawer_features.md](plan_drawer_features.md)). Beyond it, the app adds what a working dialer needs and the prototype could not show: the real API calls, error states, the calling queue (search, filters, dial, log outcome, undo, progress), sample data while the server is down, the demo login, and light/dark themes.
 
 **Small visual differences, deliberate:**
 - The active-list card shows "50 contacts" and a switch-list icon instead of the "S" avatar.
