@@ -12,7 +12,9 @@ abstract final class Links {
   static const whatsapp = 'https://wa.me/919971125511';
 
   /// Calley's own "Full setup of Calley Personal" tutorial.
-  static const tutorialVideo = 'https://www.youtube.com/watch?v=hzwSizmvMD0';
+  static const tutorialVideoId = 'hzwSizmvMD0';
+  static const tutorialVideo =
+      'https://www.youtube.com/watch?v=$tutorialVideoId';
 
   // Real pages on getcalley.com (checked 2026-11-05).
   static const terms = 'https://www.getcalley.com/terms-of-services/';

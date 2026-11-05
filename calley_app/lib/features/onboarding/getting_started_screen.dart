@@ -8,6 +8,7 @@ import '../../core/providers.dart';
 import '../../core/utils/launchers.dart';
 import '../../core/widgets/cards.dart';
 import '../../core/widgets/primary_button.dart';
+import '../../core/widgets/tutorial_video.dart';
 
 /// Figma 05 — the first screen after sign-in: who you are, where to upload
 /// numbers, the 2-minute tutorial, and "Start Calling Now".
@@ -16,7 +17,6 @@ class GettingStartedScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final c = context.c;
     final user = ref.watch(sessionProvider);
     final fromDrawer = context.canPop();
     return Scaffold(
@@ -37,53 +37,9 @@ class GettingStartedScreen extends ConsumerWidget {
                       initial: user?.initial ?? '?',
                     ),
                     const SizedBox(height: Dims.gap),
-                    AppCard(
-                      padding: EdgeInsets.zero,
-                      child: Column(
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                            color: c.navy,
-                            child: Text.rich(
-                              TextSpan(
-                                text: 'If you are here for the first time then ensure that you have uploaded the list to call from calley Web Panel hosted on ', // B-44
-                                children: [
-                                  TextSpan(
-                                    text: 'app.getcalley.com',
-                                    style: context.mono(
-                                      13,
-                                      weight: FontWeight.w600,
-                                      color: c.onNavy,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              style: context.body(
-                                13.5,
-                                color: c.onNavy,
-                                height: 1.5,
-                              ),
-                            ),
-                          ),
-                          _ChallengeThumbnail(
-                            onTap: () => ref
-                                .read(launcherProvider)
-                                .open(context, Links.tutorialVideo),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Center(
-                      child: TextButton.icon(
-                        onPressed: () => ref
-                            .read(launcherProvider)
-                            .open(context, Links.webPanel),
-                        icon: const Icon(Icons.open_in_new_rounded, size: 18),
-                        label: const Text('Open the Calley web panel'),
-                      ),
-                    ),
+                    const _UploadNote(),
+                    const SizedBox(height: Dims.gap),
+                    const TutorialVideoCard(),
                   ],
                 ),
               ),
@@ -117,62 +73,78 @@ class GettingStartedScreen extends ConsumerWidget {
   }
 }
 
-/// The "2 MINUTE CHALLENGE" video card. A poster drawn in the display face;
-/// a tap opens Calley's own setup video on YouTube.
-///
-/// B-45: a centred Column that grows with the text instead of a fixed-height
-/// Stack, so nothing runs under the play button at large text sizes. The
-/// play disc is outlined, not solid, so the blue "Start Calling Now" stays
-/// the one primary action on the screen.
-class _ChallengeThumbnail extends StatelessWidget {
-  const _ChallengeThumbnail({required this.onTap});
-
-  final VoidCallback onTap;
+/// Where to upload numbers. A light card with its own icon and label, so it
+/// reads as a note and not as a second hero beside the navy greeting card.
+/// The wording is the Figma text (B-44); the link and the button both lead
+/// to the web panel, so the button lives here instead of floating below.
+class _UploadNote extends ConsumerWidget {
+  const _UploadNote();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final c = context.c;
-    return Semantics(
-      button: true,
-      label: 'Watch the 2 minute challenge video',
-      excludeSemantics: true,
-      onTap: onTap,
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          width: double.infinity,
-          constraints: const BoxConstraints(minHeight: 200),
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 22),
-          color: c.cardAlt,
-          child: Column(
+    return AppCard(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('TUTORIAL · 2:00', style: context.eyebrow()),
-              const SizedBox(height: 10),
-              Text(
-                '2 Minute Challenge',
-                textAlign: TextAlign.center,
-                style: context.display(28, weight: FontWeight.w800),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Upload a list, sync, dial. Watch how.',
-                textAlign: TextAlign.center,
-                style: context.body(13.5, color: c.textSecondary),
-              ),
-              const SizedBox(height: 16),
               Container(
-                width: 56,
-                height: 56,
+                width: 40,
+                height: 40,
                 decoration: BoxDecoration(
-                  color: c.card,
+                  color: c.primary.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
-                  border: Border.all(color: c.border, width: 1.5),
                 ),
-                child: Icon(Icons.play_arrow_rounded, color: c.text, size: 30),
+                child: Icon(
+                  Icons.cloud_upload_outlined,
+                  color: c.primary,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('BEFORE YOU START', style: context.eyebrow()),
+                    const SizedBox(height: 6),
+                    Text.rich(
+                      TextSpan(
+                        text: 'If you are here for the first time then ensure that you have uploaded the list to call from calley Web Panel hosted on ',
+                        children: [
+                          TextSpan(
+                            text: 'app.getcalley.com',
+                            style: context.mono(
+                              13,
+                              weight: FontWeight.w600,
+                              color: c.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      style: context.body(13.5, color: c.text, height: 1.5),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-        ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 42),
+              child: TextButton.icon(
+                onPressed: () =>
+                    ref.read(launcherProvider).open(context, Links.webPanel),
+                icon: const Icon(Icons.open_in_new_rounded, size: 18),
+                label: const Text('Open the Calley web panel'),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
