@@ -1,5 +1,8 @@
 # api_reference.md — Calley mock REST API ("Mock API V2")
 
+> **Official collection found (2026-11-05):** https://documenter.getpostman.com/view/38199901/2sB34Zpiy9 — saved as [assets/postman-mock-api-v2.json](assets/postman-mock-api-v2.json). It confirms the base URL, the six endpoints and the bodies below. Examples: register → 201 `{"message":"User registered"}`; login → 200 `{"message":"Login successful","user":{"_id","username","email"}}`; send-otp → `{"message":"OTP sent"}`; verify-otp → `{"message":"OTP Verfied"}`; `GET /list` → **one object** `{_id,name,agents,clientId}`, not an array; list details → exactly `assets/sample-list-details.json`. Example login password is `123`, so sign-in must not enforce a length (fixed: `Validators.loginPassword`). **The host still answers 404 on every documented path** (re-checked 2026-11-05).
+
+
 > **Provenance:** NOT on the Notion page. Reconstructed from two prior candidates' public repos
 > (`Renukaaapatil/calley_app`, `nikhilswami992/calley_app`) which both cite the same base URL and
 > endpoints, and one says its offline JSON "matches the Postman collection". Treat as **unverified

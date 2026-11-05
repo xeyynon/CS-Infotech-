@@ -22,6 +22,11 @@ void main() {
     expect(Validators.password('123456'), isNull);
   });
 
+  test('sign-in accepts any typed password, as the server example "123"', () {
+    expect(Validators.loginPassword(''), isNotNull);
+    expect(Validators.loginPassword('123'), isNull);
+  });
+
   test('mobile needs exactly ten digits, ignoring separators', () {
     expect(Validators.mobile('98711'), isNotNull);
     expect(Validators.mobile('9871125588'), isNull);

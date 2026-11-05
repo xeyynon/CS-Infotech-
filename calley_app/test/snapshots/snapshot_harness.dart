@@ -137,6 +137,20 @@ Future<void> settle(WidgetTester tester, {int frames = 8}) async {
   for (var i = 0; i < frames; i++) {
     await tester.pump(const Duration(milliseconds: 200));
   }
+  await decodeImages(tester);
+}
+
+/// Asset images decode on real I/O, which the fake test clock never waits
+/// for; without this the Calley logo would be blank in every snapshot.
+Future<void> decodeImages(WidgetTester tester) async {
+  final images = find.byType(Image).evaluate().toList();
+  if (images.isEmpty) return;
+  await tester.runAsync(() async {
+    for (final e in images) {
+      await precacheImage((e.widget as Image).image, e);
+    }
+  });
+  await tester.pump();
 }
 
 Future<void> snap(WidgetTester tester, String name, {bool dark = false}) async {

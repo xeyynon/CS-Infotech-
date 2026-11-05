@@ -66,6 +66,39 @@ void main() {
     expect(router.state.uri.path, Routes.dashboard);
   });
 
+  testWidgets('the demo account signs in and switches to sample data', (
+    tester,
+  ) async {
+    final router = await pumpRealRouter(tester, {'pref.language': 'en'});
+    await tester.ensureVisible(find.text('Sign in with the demo account'));
+    await tester.tap(find.text('Sign in with the demo account'));
+    await settle(tester);
+    expect(router.state.uri.path, Routes.gettingStarted);
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(MaterialApp)),
+    );
+    expect(container.read(dataSourceProvider), DataSource.sample);
+    expect(container.read(sessionProvider)?.email, 'demo@getcalley.com');
+  });
+
+  testWidgets('the demo email with a wrong password is refused', (
+    tester,
+  ) async {
+    final router = await pumpRealRouter(tester, {'pref.language': 'en'});
+    await tester.enterText(
+      find.byType(TextFormField).at(0),
+      'demo@getcalley.com',
+    );
+    await tester.enterText(find.byType(TextFormField).at(1), 'nope123');
+    await tester.tap(find.text('Sign In'));
+    await settle(tester);
+    expect(router.state.uri.path, Routes.login);
+    expect(
+      find.textContaining('Wrong password for the demo account'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('a signed-out user with a language lands on Login', (
     tester,
   ) async {
