@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Page colour of the dark theme (CalleyColors.dark.bg) -->
+    <color name="launch_background">#0E0F12</color>
+</resources>
