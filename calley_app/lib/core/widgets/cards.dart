@@ -123,105 +123,168 @@ class StatLedger extends StatelessWidget {
   }
 }
 
-/// Blue hero card: time-of-day greeting, the person's name in the display
-/// face, their plan, and the brand mark bleeding off the corner.
+/// A small fact on the greeting card: the plan, or "Sample data".
+class GreetingChip {
+  const GreetingChip(this.label, this.icon);
+
+  final String label;
+  final IconData icon;
+}
+
+/// The hero card at the top of Getting Started and the dashboard.
+///
+/// Deep navy in BOTH themes, so the white text has the same strong contrast
+/// everywhere (the old brand-blue card turned pale in dark mode and its dark
+/// text washed out). Left to right: the person's initial, then "Hello" and
+/// their name in the display face; under it small chips for facts worth a
+/// glance (plan, sample mode). The official Calley mark sits faintly in the
+/// corner. It reads as one sentence for a screen reader.
 class GreetingCard extends StatelessWidget {
   const GreetingCard({
     super.key,
     required this.eyebrow,
     required this.name,
     required this.subline,
+    required this.initial,
+    this.chips = const [],
   });
 
   final String eyebrow;
   final String name;
   final String subline;
+  final String initial;
+  final List<GreetingChip> chips;
 
   @override
   Widget build(BuildContext context) {
     final c = context.c;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(Dims.cardRadius),
-      child: Container(
-        color: c.primary,
-        child: Stack(
-          children: [
-            Positioned(
-              right: -26,
-              top: -30,
-              child: Opacity(
-                opacity: 0.18,
-                child: CustomPaint(
-                  size: const Size.square(150),
-                  painter: _RingsPainter(c.onPrimary),
+    return MergeSemantics(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(Dims.cardRadius),
+        child: Container(
+          color: c.navy,
+          child: Stack(
+            children: [
+              Positioned(
+                right: -26,
+                top: -22,
+                child: Opacity(
+                  opacity: 0.2,
+                  child: ExcludeSemantics(
+                    child: Image.asset(
+                      'assets/brand/calley_mark.png',
+                      height: 168,
+                    ),
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    eyebrow.toUpperCase(),
-                    style: context.eyebrow(
-                      color: c.onPrimary.withValues(alpha: 0.78),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 54,
+                          height: 54,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: c.onNavy,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            initial,
+                            style: context.display(
+                              23,
+                              weight: FontWeight.w800,
+                              color: c.navy,
+                              height: 1,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                eyebrow.toUpperCase(),
+                                style: context.eyebrow(
+                                  color: c.onNavy.withValues(alpha: 0.7),
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                name,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: context.display(
+                                  28,
+                                  weight: FontWeight.w800,
+                                  color: c.onNavy,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                subline,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: context.body(
+                                  13.5,
+                                  color: c.onNavy.withValues(alpha: 0.85),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    name,
-                    style: context.display(
-                      28,
-                      weight: FontWeight.w800,
-                      color: c.onPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    subline,
-                    style: context.body(
-                      13.5,
-                      color: c.onPrimary.withValues(alpha: 0.85),
-                    ),
-                  ),
-                ],
+                    if (chips.isNotEmpty) ...[
+                      const SizedBox(height: 14),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          for (final chip in chips)
+                            Container(
+                              padding: const EdgeInsets.fromLTRB(9, 6, 12, 6),
+                              decoration: BoxDecoration(
+                                color: c.onNavy.withValues(alpha: 0.14),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    chip.icon,
+                                    size: 15,
+                                    color: c.onNavy.withValues(alpha: 0.9),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    chip.label,
+                                    style: context.body(
+                                      12.5,
+                                      weight: FontWeight.w600,
+                                      color: c.onNavy,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
-}
-
-class _RingsPainter extends CustomPainter {
-  _RingsPainter(this.color);
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final p = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 14
-      ..strokeCap = StrokeCap.round;
-    final centre = Offset(size.width / 2, size.height / 2);
-    for (var i = 0; i < 3; i++) {
-      final r = size.width / 2 - 8 - i * 22;
-      canvas.drawArc(
-        Rect.fromCircle(center: centre, radius: r),
-        2.6 + i * 0.25,
-        3.6,
-        false,
-        p,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _RingsPainter old) => old.color != color;
 }
 
 /// Dark navy strip used as a section header ("LOAD NUMBER TO CALL").

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/theme.dart';
 import '../../core/providers.dart';
 import '../../core/utils/formatters.dart';
+import '../../core/widgets/calley_loader.dart';
 import '../../core/widgets/cards.dart';
 import '../../core/widgets/status_views.dart';
 import '../calls/call_actions.dart';
@@ -38,14 +39,7 @@ class RemindersScreen extends ConsumerWidget {
         ),
       );
     } else if (details!.isLoading) {
-      body = ListView(
-        padding: const EdgeInsets.all(Dims.page),
-        children: const [
-          SkeletonBox(height: 72, radius: Dims.cardRadius),
-          SizedBox(height: Dims.gap),
-          SkeletonBox(height: 72, radius: Dims.cardRadius),
-        ],
-      );
+      body = const Center(child: CalleyLoader(label: 'Loading reminders…'));
     } else if (details.hasError) {
       body = Padding(
         padding: const EdgeInsets.all(Dims.page),
